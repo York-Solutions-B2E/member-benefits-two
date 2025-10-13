@@ -1,0 +1,15 @@
+# Docker
+.env
+docker-compose.override.yml
+
+# Application logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
