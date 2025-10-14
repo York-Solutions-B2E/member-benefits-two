@@ -14,7 +14,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Optional: Mount migration scripts
-      - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
     networks:
       - member-benefits-network
     healthcheck:
@@ -34,9 +33,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/member_benefits_db
       DB_USERNAME: postgres
       DB_PASSWORD: password
-      # Google OIDC (placeholder values)
-      GOOGLE_CLIENT_ID: your-google-client-id
-      GOOGLE_AUDIENCE: your-google-client-id
+      # Google OIDC - Using existing credentials
+      GOOGLE_CLIENT_ID: 1047926570153-jn8dvifgmg9lpjfngfdsm4ierh640tlg.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_AUDIENCE: 1047926570153-jn8dvifgmg9lpjfngfdsm4ierh640tlg.apps.googleusercontent.com
       # CORS
       CORS_ALLOWED_ORIGINS: http://localhost:3000
     ports:
@@ -48,15 +48,15 @@ services:
       - member-benefits-network
     restart: unless-stopped
 
-  # Frontend (placeholder for future React app)
   frontend:
-    image: nginx:alpine
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: member-benefits-frontend
     ports:
-      - "3000:80"
-    volumes:
-      # This will be used when we build the React frontend
-      - ./frontend/build:/usr/share/nginx/html:ro
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
     networks:
       - member-benefits-network
     depends_on:

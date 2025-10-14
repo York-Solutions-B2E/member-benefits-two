@@ -3,20 +3,12 @@
 ## Project Overview
 Build a healthcare member benefits dashboard with React frontend, Spring Boot backend, and PostgreSQL database. Focus on backend-first development with comprehensive testing and API documentation.
 
-**Tech Stack:**
-- Backend: Spring Boot, Spring Data JPA, Spring Security (OAuth2), PostgreSQL
-- Frontend: React (Day 6+), React Testing Library
-- Authentication: Google OIDC (Federated)
-- Testing: JUnit 5, Spring Test, Swagger UI
-- Database: PostgreSQL with Flyway migrations
-
 ---
 
 ## Day 1: Project Setup, Database Schema & Core Domain Models
-
 ### Morning: Project Initialization (2-3 hours)
-- [ ] Create Spring Boot project with Maven/Gradle
-- [ ] Add dependencies:
+- [x] Create Spring Boot project with Maven/Gradle
+- [x] Add dependencies:
   - Spring Web Starter
   - Spring Data JPA
   - Spring Security (OAuth2 Resource Server)
@@ -25,12 +17,12 @@ Build a healthcare member benefits dashboard with React frontend, Spring Boot ba
   - Validation
   - Springdoc OpenAPI (Swagger)
   - Flyway (database migrations)
-- [ ] Configure `application.yml` with:
+- [x] Configure `application.yml` with:
   - Database connection settings
   - JPA/Hibernate configuration
   - Google OIDC configuration (issuer, audience)
   - Server port and context path
-- [ ] Set up project structure:
+- [x] Set up project structure:
   ```
   src/main/java/com/memberbenefits/
   ├── config/
@@ -43,7 +35,7 @@ Build a healthcare member benefits dashboard with React frontend, Spring Boot ba
   ```
 
 ### Afternoon: Database Schema & Domain Models (3-4 hours)
-- [ ] Create JPA entities based on specification:
+- [x] Create JPA entities based on specification:
   - **Enums**: `ClaimStatus`, `AccumulatorType`, `NetworkTier`, `PlanType`
   - **Core entities**: `User`, `Member`, `Address` (embeddable), `Plan`, `Enrollment`, `Accumulator`, `Provider`, `Claim`, `ClaimLine`, `ClaimStatusEvent`
 - [ ] Add JPA annotations, relationships, and indexes
@@ -74,7 +66,6 @@ Build a healthcare member benefits dashboard with React frontend, Spring Boot ba
 ---
 
 ## Day 2: Security Configuration & Core Business Services
-
 ### Morning: OAuth2 Security Setup (3-4 hours)
 - [ ] Configure Spring Security OAuth2 Resource Server for Google OIDC JWT validation
 - [ ] Implement JWT token validation:
