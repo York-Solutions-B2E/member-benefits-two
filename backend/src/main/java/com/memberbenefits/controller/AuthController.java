@@ -1,5 +1,6 @@
 package com.memberbenefits.controller;
 
+import com.memberbenefits.domain.entity.Member;
 import com.memberbenefits.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,24 @@ public class AuthController {
                 response.put("authProvider", user.getAuthProvider());
                 response.put("authSub", user.getAuthSub());
                 response.put("createdAt", user.getCreatedAt());
+                return ResponseEntity.ok(response);
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/member")
+    @Operation(summary = "Get current member information")
+    public ResponseEntity<Map<String, Object>> getCurrentMember(Authentication authentication) {
+        return authService.getCurrentMember(authentication)
+            .map(member -> {
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", member.getId());
+                response.put("firstName", member.getFirstName());
+                response.put("lastName", member.getLastName());
+                response.put("email", member.getEmail());
+                response.put("dateOfBirth", member.getDateOfBirth());
+                response.put("phone", member.getPhone());
+                response.put("mailingAddress", member.getMailingAddress());
                 return ResponseEntity.ok(response);
             })
             .orElse(ResponseEntity.notFound().build());

@@ -15,6 +15,14 @@ const Dashboard: React.FC = () => {
       const userData = await authApi.getCurrentUser();
       setUser(userData);
       
+      // ADD THIS: Force member creation by calling /api/auth/member
+      try {
+        await authApi.getCurrentMember();
+        console.log('Member record created/retrieved');
+      } catch (error) {
+        console.error('Failed to create/retrieve member:', error);
+      }
+      
       // Then get dashboard data (when backend implements /api/dashboard)
       try {
         const dashboardResponse = await dashboardApi.getDashboardData();
@@ -25,7 +33,6 @@ const Dashboard: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error);
-      // AC4: Protected routes redirect unauthenticated users to OIDC sign-in
       navigate('/login');
     } finally {
       setLoading(false);

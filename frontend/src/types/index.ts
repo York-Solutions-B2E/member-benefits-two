@@ -5,7 +5,23 @@ export interface User {
     authSub: string;
     createdAt: string;
 }
-  
+
+export interface Member {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    dateOfBirth: string;
+    phone: string;
+    mailingAddress: {
+      line1: string;
+      line2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+    };
+}
+
 export interface Plan {
     id: string;
     name: string;     

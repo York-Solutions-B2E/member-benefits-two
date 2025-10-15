@@ -34,3 +34,12 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-20"
 [INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
+
+## Connecting To Docker & Database
+**Access PostgreSQL Database via Docker**
+```bash
+# Find your PostgreSQL container
+docker ps
+# Using docker-compose
+docker-compose exec postgres psql -U postgres -d member_benefits_db
+```

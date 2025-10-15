@@ -1,9 +1,12 @@
 package com.memberbenefits.service;
 
+import com.memberbenefits.domain.entity.Member;
 import com.memberbenefits.domain.entity.User;
 import com.memberbenefits.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
@@ -52,6 +55,14 @@ public class AuthService {
         
         OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
         return Optional.of(getOrCreateUserFromOidcUser(oidcUser));
+    }
+
+    @Autowired
+    private MemberService memberService;
+    
+    public Optional<Member> getCurrentMember(Authentication authentication) {
+        Optional<User> user = getCurrentUser(authentication);
+        return user.map(memberService::getOrCreateMemberForUser);
     }
 }
 
