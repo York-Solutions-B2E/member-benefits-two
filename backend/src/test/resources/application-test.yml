@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
     username: sa
     password: 
-    driver-class-name: org.h2.Driver
   
   jpa:
     hibernate:
@@ -14,17 +14,28 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   
   flyway:
-    enabled: false  # Disable Flyway for unit tests
+    enabled: false
   
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://mock-issuer.com
-          jwk-set-uri: https://mock-issuer.com/.well-known/jwks.json
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 
 logging:
   level:
     com.memberbenefits: DEBUG
     org.springframework.security: DEBUG
-    org.testcontainers: INFO

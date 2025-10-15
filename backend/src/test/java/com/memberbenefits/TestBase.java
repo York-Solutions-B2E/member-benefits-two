@@ -8,5 +8,5 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test")
 @Transactional
 public abstract class TestBase {
-    // Base class for all tests
+    // Base test configuration
 }
