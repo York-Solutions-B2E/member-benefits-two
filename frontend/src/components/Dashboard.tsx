@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, DashboardData } from '../types';
 import { authApi, dashboardApi } from '../services/api';
@@ -9,11 +9,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async (): Promise<void> => {
+  const fetchDashboardData = useCallback(async (): Promise<void> => {
     try {
       // First get user data from /api/auth/me
       const userData = await authApi.getCurrentUser();
@@ -34,7 +30,11 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const handleSignOut = (): void => {
     // AC5: Sign out clears tokens and calls IDP end-session endpoint
@@ -42,86 +42,99 @@ const Dashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={styles.loading}>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen text-lg">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gray-100">
       {/* Global UI: App header with product name, member name, and Sign out */}
-      <header style={styles.header}>
-        <h1>Member Benefits Dashboard</h1>
-        <div style={styles.userInfo}>
-          <span>Welcome, {user?.email}</span>
-          <button onClick={handleSignOut} style={styles.signOutButton}>
+      <header className="bg-white px-8 py-4 shadow-md flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-gray-800">Member Benefits Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-600">Welcome, {user?.email}</span>
+          <button 
+            onClick={handleSignOut} 
+            className="bg-red-600 hover:bg-red-700 text-white border-none py-2 px-4 rounded cursor-pointer transition-colors duration-200"
+          >
             Sign Out
           </button>
         </div>
       </header>
       
-      <main style={styles.main}>
-        <h2>Dashboard</h2>
+      <main className="p-8 max-w-6xl mx-auto">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h2>
         
         {/* AC1: Show active plan (name, network) and coverage period */}
-        <div style={styles.section}>
-          <h3>Active Plan</h3>
+        <div className="bg-white p-6 mb-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Active Plan</h3>
           {dashboardData?.activePlan ? (
-            <div>
-              <p><strong>{dashboardData.activePlan.name}</strong></p>
-              <p>Network: {dashboardData.activePlan.networkName}</p>
-              <p>Coverage: {dashboardData.activePlan.planYear}</p>
+            <div className="space-y-2">
+              <p><strong className="text-gray-800">{dashboardData.activePlan.name}</strong></p>
+              <p className="text-gray-600">Network: {dashboardData.activePlan.networkName}</p>
+              <p className="text-gray-600">Coverage: {dashboardData.activePlan.planYear}</p>
             </div>
           ) : (
-            <p>No active plan found</p>
+            <p className="text-gray-500">No active plan found</p>
           )}
         </div>
 
         {/* AC2: Show Deductible and OOP Max progress (used vs. limit) for in-network */}
-        <div style={styles.section}>
-          <h3>Accumulators</h3>
+        <div className="bg-white p-6 mb-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Accumulators</h3>
           {dashboardData?.accumulators ? (
-            <div>
+            <div className="space-y-4">
               {dashboardData.accumulators.map((acc) => (
-                <div key={acc.id} style={styles.accumulator}>
-                  <p>{acc.type}: ${acc.usedAmount} / ${acc.limitAmount}</p>
-                  <div style={styles.progressBar}>
+                <div key={acc.id} className="mb-4">
+                  <p className="text-gray-700 mb-2">{acc.type}: ${acc.usedAmount} / ${acc.limitAmount}</p>
+                  <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      style={{
-                        ...styles.progressFill,
-                        width: `${(acc.usedAmount / acc.limitAmount) * 100}%`
-                      }}
+                      className="h-full bg-blue-600 transition-all duration-300 ease-out"
+                      style={{ width: `${(acc.usedAmount / acc.limitAmount) * 100}%` }}
                     />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p>No accumulator data available</p>
+            <p className="text-gray-500">No accumulator data available</p>
           )}
         </div>
 
         {/* AC3: Show Recent Claims (latest 5) with status and member responsibility */}
-        <div style={styles.section}>
-          <h3>Recent Claims</h3>
+        <div className="bg-white p-6 mb-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Claims</h3>
           {dashboardData?.recentClaims && dashboardData.recentClaims.length > 0 ? (
             <div>
-              {dashboardData.recentClaims.map((claim) => (
-                <div key={claim.id} style={styles.claimItem}>
-                  <span>#{claim.claimNumber}</span>
-                  <span>{claim.status}</span>
-                  <span>${claim.totalMemberResponsibility}</span>
-                  {/* AC4: Clicking a recent claim opens Claim Detail */}
-                  <button onClick={() => navigate(`/claims/${claim.claimNumber}`)}>
-                    View
-                  </button>
-                </div>
-              ))}
+              <div className="space-y-2">
+                {dashboardData.recentClaims.map((claim) => (
+                  <div key={claim.id} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                    <span className="text-gray-700">#{claim.claimNumber}</span>
+                    <span className="text-gray-600">{claim.status}</span>
+                    <span className="text-gray-700 font-medium">${claim.totalMemberResponsibility}</span>
+                    {/* AC4: Clicking a recent claim opens Claim Detail */}
+                    <button 
+                      onClick={() => navigate(`/claims/${claim.claimNumber}`)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors duration-200"
+                    >
+                      View
+                    </button>
+                  </div>
+                ))}
+              </div>
               {/* AC5: View All Claims navigates to Claims List */}
-              <button onClick={() => navigate('/claims')} style={styles.viewAllButton}>
+              <button 
+                onClick={() => navigate('/claims')} 
+                className="bg-blue-600 hover:bg-blue-700 text-white border-none py-2 px-5 rounded cursor-pointer mt-4 transition-colors duration-200"
+              >
                 View All Claims
               </button>
             </div>
           ) : (
-            <p>No recent claims found</p>
+            <p className="text-gray-500">No recent claims found</p>
           )}
         </div>
       </main>
@@ -129,97 +142,5 @@ const Dashboard: React.FC = () => {
   );
 };
 
-interface Styles {
-  container: React.CSSProperties;
-  header: React.CSSProperties;
-  userInfo: React.CSSProperties;
-  signOutButton: React.CSSProperties;
-  main: React.CSSProperties;
-  section: React.CSSProperties;
-  loading: React.CSSProperties;
-  accumulator: React.CSSProperties;
-  progressBar: React.CSSProperties;
-  progressFill: React.CSSProperties;
-  claimItem: React.CSSProperties;
-  viewAllButton: React.CSSProperties;
-}
-
-const styles: Styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5'
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: '1rem 2rem',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem'
-  },
-  signOutButton: {
-    backgroundColor: '#d32f2f',
-    color: 'white',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  main: {
-    padding: '2rem',
-    maxWidth: '1200px',
-    margin: '0 auto'
-  },
-  section: {
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    marginBottom: '1rem',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  loading: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    fontSize: '18px'
-  },
-  accumulator: {
-    marginBottom: '1rem'
-  },
-  progressBar: {
-    width: '100%',
-    height: '20px',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '10px',
-    overflow: 'hidden'
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#4285f4',
-    transition: 'width 0.3s ease'
-  },
-  claimItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0.5rem 0',
-    borderBottom: '1px solid #eee'
-  },
-  viewAllButton: {
-    backgroundColor: '#4285f4',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginTop: '1rem'
-  }
-};
 
 export default Dashboard;
