@@ -1,394 +1,262 @@
-# 5-Day Member Benefits Dashboard Development Plan
+from pathlib import Path
 
-## Project Overview
-Build a healthcare member benefits dashboard with React frontend, Spring Boot backend, and PostgreSQL database. Focus on backend-first development with comprehensive testing and API documentation.
+content = """# 14-Day MVP Build Plan (Frontend / Backend / Database)
 
----
+## Day 1 — Repos, environments, and contracts
 
-## Day 1: Project Setup, Database Schema & Core Domain Models
-### Morning: Project Initialization (2-3 hours)
-- [x] Create Spring Boot project with Maven/Gradle
-- [x] Add dependencies:
-  - Spring Web Starter
-  - Spring Data JPA
-  - Spring Security (OAuth2 Resource Server)
-  - PostgreSQL Driver
-  - Lombok
-  - Validation
-  - Springdoc OpenAPI (Swagger)
-  - Flyway (database migrations)
-- [x] Configure `application.yml` with:
-  - Database connection settings
-  - JPA/Hibernate configuration
-  - Google OIDC configuration (issuer, audience)
-  - Server port and context path
-- [x] Set up project structure:
-  ```
-  src/main/java/com/memberbenefits/
-  ├── config/
-  ├── domain/
-  ├── repository/
-  ├── service/
-  ├── controller/
-  ├── dto/
-  └── exception/
-  ```
+**Frontend**
+- Create React app skeleton with Router; routes: `/login`, `/`, `/claims`, `/claims/:claimNumber`.
+- App shell: header placeholder (product name), route scaffolds.
 
-### Afternoon: Database Schema & Domain Models (3-4 hours)
-- [x] Create JPA entities based on specification:
-  - **Enums**: `ClaimStatus`, `AccumulatorType`, `NetworkTier`, `PlanType`
-  - **Core entities**: `User`, `Member`, `Address` (embeddable), `Plan`, `Enrollment`, `Accumulator`, `Provider`, `Claim`, `ClaimLine`, `ClaimStatusEvent`
-- [ ] Add JPA annotations, relationships, and indexes
-- [ ] Create Flyway migration script (`V1__initial_schema.sql`)
-- [ ] Write SQL seed script (`V2__seed_data.sql`) with test data:
-  - 1 user (Google OIDC mapping)
-  - 1 member with profile info
-  - 1 active plan (Gold PPO)
-  - 2-3 providers (River Clinic, City Imaging Center, Prime Hospital)
-  - 12-15 claims with varying statuses
-  - Claim lines with realistic CPT codes
-  - Status history events
-  - Accumulator data (deductible, OOP max)
+**Backend**
+- Spring Boot skeleton; modules: `api`, `domain`, `infra`.
+- Add Spring Web + Validation; create empty controllers for `/api/auth`, `/api/dashboard`, `/api/claims`.
 
-### Evening: Repository Layer (2-3 hours)
-- [ ] Create Spring Data JPA repositories for all entities
-- [ ] Add custom query methods for Claims filtering:
-  - Filter by status (multi-select)
-  - Filter by date range
-  - Filter by provider name (text search)
-  - Filter by claim number (exact match)
-- [ ] Add pagination support to ClaimsRepository
-- [ ] Test database connectivity and seed data loading
-- [ ] Verify all relationships work correctly
+**Database**
+- Dockerized Postgres; create `docker-compose.yml`.
+- Add Flyway/Liquibase; create baseline migration (schema version table only).
 
-**Deliverable:** Working database schema with seed data, all JPA entities and repositories
+**Outcome / DoD**
+- `docker compose up` starts Postgres; both apps run locally; FE can call a placeholder `GET /api/health` (200).
 
 ---
 
-## Day 2: Security Configuration & Core Business Services
-### Morning: OAuth2 Security Setup (3-4 hours)
-- [ ] Configure Spring Security OAuth2 Resource Server for Google OIDC JWT validation
-- [ ] Implement JWT token validation:
-  - Verify issuer (`https://accounts.google.com`)
-  - Validate audience (client ID)
-  - Configure JWKs endpoint for key rotation
-- [ ] Create `SecurityConfig` with:
-  - Protected endpoints configuration
-  - CORS configuration for React frontend
-  - Security matchers for public vs protected routes
-- [ ] Implement user mapping:
-  - Extract `sub` and `email` from JWT token
-  - Map to `User` entity (create if not exists)
-  - Link to `Member` entity
-- [ ] Create `@CurrentUser` annotation and resolver for controller access
+## Day 2 — OIDC plumbing (no local passwords)
 
-### Afternoon: Service Layer Implementation (3-4 hours)
-- [ ] **AuthService**:
-  - Handle user lookup/creation from OIDC token
-  - Get current member information
-  - Validate user permissions
-- [ ] **DashboardService**:
-  - Fetch active plan information
-  - Get accumulator data (deductible, OOP max)
-  - Retrieve recent 5 claims for dashboard
-- [ ] **ClaimService**:
-  - Get claims with server-side filtering
-  - Implement pagination (default 10, max 25)
-  - Get claim detail with lines and status history
-  - Handle sorting by processed/received date (desc)
-- [ ] **MemberService**:
-  - Get member profile information
-  - Get enrollment details
-  - Validate member access to claims
+**Frontend**
+- Integrate OIDC client (e.g., `oidc-client-ts`): “Continue with Google” button.
+- Guarded routes; auth callback handling; sign-out clears session.
 
-### Evening: DTOs & Mapping (2-3 hours)
-- [ ] Create response DTOs for all API endpoints:
-  - `DashboardResponse`
-  - `ClaimSummaryResponse`
-  - `ClaimDetailResponse`
-  - `AccumulatorResponse`
-  - `UserResponse`
-- [ ] Implement DTO mappers (manual mapping or MapStruct)
-- [ ] Add validation annotations to DTOs
-- [ ] Create custom exception classes:
-  - `ResourceNotFoundException`
-  - `UnauthorizedException`
-  - `ValidationException`
+**Backend**
+- Configure **OAuth2 Resource Server** (JWT) with issuer/JWKs; 401 for missing/invalid token.
+- Add `/api/health` (permitAll).
 
-**Deliverable:** Complete service layer with security, business logic, and DTOs
+**Database**
+- None.
+
+**Outcome / DoD**
+- Unauthed hits to `/api/*` → 401. Clicking “Continue with Google” completes code flow and FE stores tokens; protected routes load only when authenticated.
 
 ---
 
-## Day 3: REST API Controllers & Swagger Documentation
+## Day 3 — Domain schema + seed data
 
-### Morning: Controller Implementation (3-4 hours)
-- [ ] **AuthController**:
-  - `GET /api/auth/me` - Get current user and member info
-- [ ] **DashboardController**:
-  - `GET /api/dashboard` - Active plan, accumulators, recent claims
-- [ ] **ClaimController**:
-  - `GET /api/claims` - Paginated, filtered claims list
-    - Query parameters: status, startDate, endDate, provider, claimNumber, page, size
-  - `GET /api/claims/{claimNumber}` - Claim detail with lines and status history
-- [ ] Add proper HTTP status codes and response headers
-- [ ] Implement request validation with `@Valid`
+**Frontend**
+- None (prepare mock DTO types for compile-time).
 
-### Afternoon: Error Handling & Validation (2-3 hours)
-- [ ] Implement `@ControllerAdvice` for global exception handling
-- [ ] Add proper HTTP status codes and error response format
-- [ ] Create standardized error response structure:
-  ```json
-  {
-    "timestamp": "2024-01-15T10:30:00Z",
-    "status": 400,
-    "error": "Bad Request",
-    "message": "Validation failed",
-    "path": "/api/claims",
-    "details": [...]
-  }
-  ```
-- [ ] Add field-level validation messages
-- [ ] Handle security exceptions and unauthorized access
+**Backend**
+- Implement entities + JPA repos for: **User, Member, Plan, Enrollment, Accumulator, Provider, Claim, ClaimLine, ClaimStatusEvent** (DTOs separate from entities).
+- Add `AuthMappingService`: map `iss/sub/email` → `User` on first request; link to a seeded `Member`.
 
-### Evening: Swagger/OpenAPI Configuration (2-3 hours)
-- [ ] Configure Springdoc OpenAPI for Swagger UI
-- [ ] Add API documentation annotations:
-  - `@Operation` for endpoint descriptions
-  - `@ApiResponse` for response documentation
-  - `@Schema` for request/response models
-- [ ] Configure OAuth2 security scheme in Swagger for JWT testing
-- [ ] Document all request/response models and query parameters
-- [ ] Test all endpoints via Swagger UI at `/swagger-ui.html`
-- [ ] Create example JWT token for testing
+**Database**
+- Migration V1: tables for entities above; enums for `AccumulatorType`, `NetworkTier`, `ClaimStatus`.
+- Migration V2 seed:
+  - 1 user→member, 1 plan, 1 enrollment (active period), **in-network** accumulators, 2–3 providers,
+  - 8–15 claims with lines + status history.
 
-**Deliverable:** Complete REST API with Swagger documentation and error handling
+**Outcome / DoD**
+- Hitting `/api/auth/me` (authed) returns current user + basic member info from DB mapping.
 
 ---
 
-## Day 4: Automated Testing (Backend)
+## Day 4 — Dashboard API
 
-### Morning: Repository & Service Tests (3-4 hours)
-- [ ] Set up test configuration:
-  - H2 in-memory database for unit tests
-  - Testcontainers PostgreSQL for integration tests
-- [ ] **Repository Tests**:
-  - Test custom query methods (filtering, pagination)
-  - Test relationships and cascading operations
-  - Test edge cases (empty results, invalid parameters)
-- [ ] **Service Layer Tests**:
-  - Mock repositories with Mockito
-  - Test business logic and data transformation
-  - Test filtering and pagination logic
-  - Test edge cases and error scenarios
-  - Test authentication and authorization logic
+**Frontend**
+- Define `DashboardResponse` type (plan, accumulators in-network, last 5 claims).
 
-### Afternoon: Controller Integration Tests (3-4 hours)
-- [ ] Use `@SpringBootTest` and `MockMvc` for integration tests
-- [ ] **AuthController Tests**:
-  - Test with mocked JWT authentication
-  - Test unauthorized access scenarios
-  - Test user creation from OIDC token
-- [ ] **DashboardController Tests**:
-  - Test response structure and data accuracy
-  - Test with different member scenarios
-- [ ] **ClaimController Tests**:
-  - Test filtering with various parameter combinations
-  - Test pagination functionality
-  - Test claim detail retrieval
-  - Test error responses and validation
-- [ ] Verify HTTP status codes and response formats
-- [ ] Test CORS configuration
+**Backend**
+- Service + controller for `GET /api/dashboard`:
+  - Active plan + coverage, **Deductible**/**OOP Max** (in-network) from accumulators,
+  - Recent 5 claims (id/number, status, memberResponsibility, provider, dates).
+- Enforce member scoping in service/repo.
 
-### Evening: Test Coverage & Refinement (2-3 hours)
-- [ ] Run test coverage report (JaCoCo)
-- [ ] Aim for 70%+ coverage on service and controller layers
-- [ ] Add missing test cases for edge scenarios
-- [ ] Create test data builders for consistent test setup
-- [ ] Document test setup and execution in README
-- [ ] Set up CI/CD pipeline configuration (GitHub Actions)
+**Database**
+- Indexes: `claims(received_date desc)`, `claims(member_id)`.
 
-**Deliverable:** Comprehensive test suite with good coverage
+**Outcome / DoD**
+- Swagger/OpenAPI shows the response schema + example; sample call returns seeded values.
 
 ---
 
-## Day 5: API Testing, Documentation & Frontend Prep
+## Day 5 — Dashboard UI
 
-### Morning: Manual API Testing & Refinement (3-4 hours)
-- [ ] Create Postman collection for all endpoints (alternative to Swagger)
-- [ ] Test complete user flows:
-  - Authentication flow with Google OIDC token
-  - Dashboard data retrieval and accuracy
-  - Claims filtering with various combinations
-  - Claim detail with all related data
-- [ ] Verify response times and query optimization
-- [ ] Add database indexes if needed for performance
-- [ ] Test pagination with larger datasets
-- [ ] Validate error handling scenarios
+**Frontend**
+- Build Dashboard: **Plan card**, two progress bars (used/limit) for Deductible & OOP Max, **Recent Claims** (5) with link to detail; **View All Claims** CTA.
+- Loading skeletons + error toasts; date/currency formatting.
 
-### Afternoon: Additional Seed Data & Scenarios (2-3 hours)
-- [ ] Enhance SQL seed script with diverse test scenarios:
-  - Claims in all statuses (Submitted, In Review, Processed, Paid, Denied)
-  - Various date ranges spanning multiple months
-  - Different providers and specialties
-  - Edge cases (denied claims, zero responsibility, high amounts)
-  - Multiple claim lines per claim
-- [ ] Create optional admin endpoints for programmatic data creation
-- [ ] Test pagination with 50+ claims
-- [ ] Verify accumulator calculations are correct
+**Backend**
+- Add ETag/Cache-Control (optional) for `/api/dashboard`.
 
-### Evening: Documentation & Frontend Integration Prep (3-4 hours)
-- [ ] Complete comprehensive README with:
-  - Project overview and tech stack
-  - Prerequisites (Java 17, PostgreSQL 13+, Maven/Gradle)
-  - Setup instructions step-by-step
-  - Google OIDC configuration steps
-  - Database migration and seeding instructions
-  - Running the application
-  - Running tests
-  - API documentation link (Swagger)
-- [ ] Document API contracts for frontend team:
-  - Request/response schemas
-  - Authentication requirements
-  - Error handling patterns
-  - CORS configuration
-- [ ] Create environment variables documentation
-- [ ] Prepare CORS configuration for React frontend
-- [ ] Document deployment considerations
+**Database**
+- None.
 
-**Deliverable:** Production-ready backend with complete documentation, ready for frontend integration
+**Outcome / DoD**
+- Signed-in user loads Dashboard end-to-end with live API; clicking a recent claim routes to detail.
 
 ---
 
-## Key Files to Create
+## Day 6 — Claims List API (filters + paging)
 
-### Configuration Files
-- `pom.xml` or `build.gradle` - Maven/Gradle dependencies
-- `src/main/resources/application.yml` - Application configuration
-- `src/main/resources/db/migration/V1__initial_schema.sql` - Database schema
-- `src/main/resources/db/migration/V2__seed_data.sql` - Test data
-- `src/main/java/com/memberbenefits/config/SecurityConfig.java` - OAuth2 security
-- `src/main/java/com/memberbenefits/config/OpenApiConfig.java` - Swagger configuration
+**Frontend**
+- Define list DTO + filter model (status[], startDate, endDate, provider text, claimNumber exact, page, size).
 
-### Domain Layer
-- `src/main/java/com/memberbenefits/domain/enums/` - All enums
-- `src/main/java/com/memberbenefits/domain/entity/` - All JPA entities
-- `src/main/java/com/memberbenefits/domain/embeddable/Address.java` - Embeddable address
+**Backend**
+- Implement `GET /api/claims?status=&startDate=&endDate=&provider=&claimNumber=&page=&size=`:
+  - Multi-status (OR), date range, `provider ILIKE`, exact claim #, **server-side pagination** (default 10, max 25).
+- Repository specs/criteria queries; validate params; return page metadata.
 
-### Repository Layer
-- `src/main/java/com/memberbenefits/repository/` - Spring Data JPA repositories
+**Database**
+- Indexes: `claims(status)`, `claims(service_start_date)`, `claims(provider_id)`, `claims(claim_number unique)`.
 
-### Service Layer
-- `src/main/java/com/memberbenefits/service/` - Business logic services
-- `src/main/java/com/memberbenefits/dto/` - Request/Response DTOs
-- `src/main/java/com/memberbenefits/mapper/` - DTO mappers
-
-### Controller Layer
-- `src/main/java/com/memberbenefits/controller/` - REST controllers
-- `src/main/java/com/memberbenefits/exception/` - Exception handling
-- `src/main/java/com/memberbenefits/security/` - Security utilities
-
-### Testing
-- `src/test/java/com/memberbenefits/repository/` - Repository tests
-- `src/test/java/com/memberbenefits/service/` - Service tests
-- `src/test/java/com/memberbenefits/controller/` - Controller integration tests
-- `src/test/resources/` - Test configuration and data
+**Outcome / DoD**
+- Curl tests confirm filters combine correctly; empty results return empty page with total=0.
 
 ---
 
-## Testing Strategy
+## Day 7 — Claims List UI
 
-### Unit Tests (JUnit 5 + Mockito)
-- **Service Layer**: Mock repositories, test business logic
-- **Focus Areas**: Filtering, pagination, data transformation, validation
-- **Coverage Target**: 80%+ for service layer
+**Frontend**
+- Data grid with columns: Claim #, Service Dates, Provider, Status, **Member Responsibility**.
+- Filter bar: multi-select status, date range, provider search, claim #; **URL-synced state**; pagination controls.
 
-### Integration Tests (Spring Boot Test + MockMvc)
-- **Controller Layer**: Test full request/response cycle
-- **Database**: Use Testcontainers PostgreSQL
-- **Authentication**: Mock JWT tokens for testing
-- **Verification**: JSON responses, HTTP status codes, error handling
+**Backend**
+- 400 on invalid query params; integration test for a combined filter (e.g., Status=Processed + date window).
 
-### Manual API Testing (Swagger UI + Postman)
-- **Interactive Testing**: During development and validation
-- **OAuth2 Testing**: JWT token validation
-- **User Flows**: Complete end-to-end scenarios
-- **Performance**: Response time validation
+**Database**
+- None.
+
+**Outcome / DoD**
+- From Dashboard, **View All Claims** opens list with server data; filters/pagination behave and persist via URL.
 
 ---
 
-## Success Criteria
+## Day 8 — Claim Detail API (totals + timeline)
 
-### Day 1 Success Criteria
-- ✅ Spring Boot project created with all dependencies
-- ✅ Database schema created with all tables and relationships
-- ✅ Seed data loaded successfully with realistic test scenarios
-- ✅ All JPA entities and repositories functional
+**Frontend**
+- Define `ClaimDetailResponse`: header, **status history timeline**, financial summary (billed/allowed/planPaid/memberResponsibility), lines table.
 
-### Day 2 Success Criteria
-- ✅ OAuth2 JWT authentication working with Google
-- ✅ User mapping from OIDC token to User/Member entities
-- ✅ All service layer methods implemented and tested
-- ✅ DTOs created with proper validation
+**Backend**
+- `GET /api/claims/{claimNumber}`:
+  - Join provider + lines + status events (ordered),
+  - Validate: summary totals == sum(lines) in service layer; 404 if not found.
 
-### Day 3 Success Criteria
-- ✅ All REST endpoints functional and documented in Swagger
-- ✅ Error handling working correctly
-- ✅ API documentation complete with examples
-- ✅ Swagger UI accessible and functional
+**Database**
+- Index: `claim_status_events(claim_id, occurred_at)`.
+- Check constraint examples (optional): money ≥ 0.
 
-### Day 4 Success Criteria
-- ✅ 70%+ test coverage on services and controllers
-- ✅ All unit and integration tests passing
-- ✅ Test data builders and utilities created
-- ✅ CI/CD pipeline configured
-
-### Day 5 Success Criteria
-- ✅ All endpoints tested manually via Swagger/Postman
-- ✅ Performance acceptable (< 500ms for list queries)
-- ✅ Complete documentation for frontend integration
-- ✅ CORS configured for React frontend
-- ✅ Ready for frontend development
+**Outcome / DoD**
+- Example claim returns coherent totals; events in chronological order.
 
 ---
 
-## Risk Mitigation
+## Day 9 — Claim Detail UI
 
-### Technical Risks
-- **OAuth2 Configuration Complexity**: Start with simple JWT validation, add complexity gradually
-- **Database Performance**: Add indexes early, monitor query performance
-- **Test Data Quality**: Create realistic seed data with edge cases
+**Frontend**
+- Layout: header block, **visual timeline**, summary card, line-items table (CPT, desc, billed, allowed, deductible/copay/coinsurance, plan paid, you owe).
+- “Back to Claims” restores prior filters/page (via URL state).
 
-### Timeline Risks
-- **Scope Creep**: Stick to core 4 screens, defer nice-to-haves
-- **Testing Time**: Focus on critical path testing, add comprehensive tests later
-- **Documentation**: Use templates and examples to speed up documentation
+**Backend**
+- Add lightweight response caching (optional) for detail.
 
-### Dependencies
-- **Google OIDC Setup**: Have fallback test JWT tokens ready
-- **PostgreSQL**: Use Docker for consistent environment
-- **Frontend Integration**: Document API contracts early for parallel development
+**Database**
+- None.
+
+**Outcome / DoD**
+- Navigating from list → detail → back preserves state; numbers are correctly formatted; totals match sum of lines.
 
 ---
 
-## Next Steps (Days 6+)
+## Day 10 — Auth hardening & sign-out
 
-After completing the backend:
-1. **Frontend Setup**: Create React project with routing and authentication
-2. **UI Components**: Build the 4 screens (Login, Dashboard, Claims List, Claim Detail)
-3. **Integration**: Connect frontend to backend APIs
-4. **Testing**: Add React Testing Library tests
-5. **Deployment**: Set up Docker containers and deployment pipeline
+**Frontend**
+- Global 401/403 interceptor → re-auth flow; refresh token handling if available from IDP.
+- Implement **Sign out** that clears tokens and hits IDP end-session (if supported).
 
----
+**Backend**
+- Add `/actuator/health`; request logging with correlation ID header passthrough.
 
-## Daily Standup Questions
+**Database**
+- None.
 
-Each day, review:
-1. What was completed yesterday?
-2. What is planned for today?
-3. Are there any blockers or risks?
-4. Is the timeline still on track?
+**Outcome / DoD**
+- Full session lifecycle is smooth: sign-in, refresh (if enabled), sign-out → back to login; protected routes verify redirect.
 
 ---
 
-*This plan provides a structured approach to building a production-ready backend for the Member Benefits Dashboard, with emphasis on testing, documentation, and frontend integration preparation.*
+## Day 11 — Packaging & local prod run
+
+**Frontend**
+- Production build; Nginx (or Vite preview) container; env-driven API base URL.
+
+**Backend**
+- Container image with runtime profile; externalize OIDC config and DB creds.
+
+**Database**
+- Ensure Flyway/Liquibase runs on start; provide `.env` for compose.
+
+**Outcome / DoD**
+- One-shot `docker compose up` brings **frontend + backend + postgres**; app works via http://localhost.
+
+---
+
+## Day 12 — Tests & QA sweep
+
+**Frontend**
+- React Testing Library:
+  - Route guarding (redirect unauth),
+  - Claims List filter + pagination,
+  - Claim Detail rendering of totals & timeline.
+
+**Backend**
+- MVC tests for `/api/dashboard`, `/api/claims`, `/api/claims/{claimNumber}`;
+- Repository tests for filter combinations.
+
+**Database**
+- Add a couple of “edge” rows in seeds (no matches; future dates) for test coverage.
+
+**Outcome / DoD**
+- All tests green; screenshots for acceptance doc.
+
+---
+
+## Day 13 — Docs & polish
+
+**Frontend**
+- Update README usage notes; link to OIDC setup, routes, and environment variables.
+
+**Backend**
+- Finalize OpenAPI with request/response schemas + examples.
+
+**Database**
+- “Data dictionary” section in README describing core tables and relationships.
+
+**Outcome / DoD**
+- New dev can configure OIDC (issuer, client, redirect URIs), run seeds, and sign in within minutes.
+
+---
+
+## Day 14 — Acceptance checks + buffer
+
+**Frontend**
+- Fix any UI nits (a11y labels, keyboard focus on route change, skeleton timings).
+
+**Backend**
+- HTTP caching headers on read endpoints (light); ensure pagination caps.
+
+**Database**
+- Verify indices are present; EXPLAIN on the heaviest list query.
+
+**Outcome / DoD**
+- Pass the spot-check acceptance tests listed in the spec (sign-in → dashboard; list filters; detail totals; redirect unauth).
+
+---
+
+## Notes on “connecting pieces”
+- **Scope guardrails**: exactly **Login (OIDC), Dashboard, Claims List, Claim Detail**; keep payloads tight and list endpoints paginated.
+- **Security model**: FE initiates OIDC; BE validates JWT; **map OIDC `sub` to User→Member** and enforce per-member reads.
+- **Non-functional**: controller→service→repo layering; money as decimals; dates/times normalized; default page size 10, max 25; UTC in DB, localized in UI.
+"""
+
+path = Path("/mnt/data/14_Day_MVP_Build_Plan.md")
+path.write_text(content)
+path
