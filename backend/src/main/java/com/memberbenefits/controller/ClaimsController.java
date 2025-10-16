@@ -37,31 +37,37 @@ public class ClaimsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
-        log.debug("Claims list request - status: {}, startDate: {}, endDate: {}, provider: {}, claimNumber: {}, page: {}, size: {}", 
-                 status, startDate, endDate, provider, claimNumber, page, size);
-        
-        // Get current member
-        Optional<Member> memberOpt = authService.getCurrentMember(authentication);
-        if (memberOpt.isEmpty()) {
-            log.warn("No authenticated member found");
-            return ResponseEntity.status(401).build();
+        try {
+            log.debug("Claims list request - status: {}, startDate: {}, endDate: {}, provider: {}, claimNumber: {}, page: {}, size: {}", 
+                     status, startDate, endDate, provider, claimNumber, page, size);
+            
+            // Get current member
+            Optional<Member> memberOpt = authService.getCurrentMember(authentication);
+            if (memberOpt.isEmpty()) {
+                log.warn("No authenticated member found");
+                return ResponseEntity.status(401).build();
+            }
+            
+            Member member = memberOpt.get();
+            log.debug("Found member: {} with ID: {}", member.getFirstName() + " " + member.getLastName(), member.getId());
+            
+            // Build request object
+            ClaimsListRequest request = new ClaimsListRequest();
+            request.setStatus(status);
+            request.setStartDate(startDate);
+            request.setEndDate(endDate);
+            request.setProvider(provider);
+            request.setClaimNumber(claimNumber);
+            request.setPage(page);
+            request.setSize(size);
+            
+            // Get claims list
+            ClaimsListResponse response = claimsService.getClaimsList(member.getId(), request);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error fetching claims list", e);
+            return ResponseEntity.status(500).build();
         }
-        
-        Member member = memberOpt.get();
-        
-        // Build request object
-        ClaimsListRequest request = new ClaimsListRequest();
-        request.setStatus(status);
-        request.setStartDate(startDate);
-        request.setEndDate(endDate);
-        request.setProvider(provider);
-        request.setClaimNumber(claimNumber);
-        request.setPage(page);
-        request.setSize(size);
-        
-        // Get claims list
-        ClaimsListResponse response = claimsService.getClaimsList(member.getId(), request);
-        
-        return ResponseEntity.ok(response);
     }
 }

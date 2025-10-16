@@ -2,6 +2,7 @@ package com.memberbenefits.service;
 
 import com.memberbenefits.domain.entity.Claim;
 import com.memberbenefits.domain.entity.Provider;
+import com.memberbenefits.domain.enums.ClaimStatus;
 import com.memberbenefits.dto.ClaimSummaryDto;
 import com.memberbenefits.dto.ClaimsListRequest;
 import com.memberbenefits.dto.ClaimsListResponse;
@@ -36,10 +37,15 @@ public class ClaimsService {
         // Create pageable with default sorting by received date DESC
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
         
+        // Handle null or empty status list
+        List<ClaimStatus> statusFilter = (request.getStatus() != null && !request.getStatus().isEmpty()) 
+            ? request.getStatus() 
+            : null;
+        
         // Execute the filtered query (without provider filter)
         Page<Claim> claimsPage = claimRepository.findClaimsWithFilters(
             memberId,
-            request.getStatus(),
+            statusFilter, // Pass null instead of empty list
             request.getStartDate(),
             request.getEndDate(),
             request.getProvider(), // Pass but not used in query
