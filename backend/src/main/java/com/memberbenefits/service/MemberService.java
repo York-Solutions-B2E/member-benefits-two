@@ -23,8 +23,24 @@ public class MemberService {
     
     @Transactional
     public Member getOrCreateMemberForUser(User user) {
-        return memberRepository.findByUserId(user.getId())
-            .orElseGet(() -> createNewMemberForUser(user));
+        // First try to find by user ID
+        Optional<Member> existingByUserId = memberRepository.findByUserId(user.getId());
+        if (existingByUserId.isPresent()) {
+            return existingByUserId.get();
+        }
+        
+        // If not found by user ID, try to find by email (for seeded data)
+        Optional<Member> existingByEmail = memberRepository.findByEmail(user.getEmail());
+        if (existingByEmail.isPresent()) {
+            Member member = existingByEmail.get();
+            // Update the member to link it to the current user
+            member.setUserId(user.getId());
+            member.setUpdatedAt(OffsetDateTime.now());
+            return memberRepository.save(member);
+        }
+        
+        // If no existing member found, create a new one
+        return createNewMemberForUser(user);
     }
     
     private Member createNewMemberForUser(User user) {

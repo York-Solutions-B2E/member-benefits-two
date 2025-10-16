@@ -2,6 +2,8 @@ package com.memberbenefits.repository;
 
 import com.memberbenefits.domain.entity.Claim;
 import com.memberbenefits.domain.enums.ClaimStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +39,24 @@ public interface ClaimRepository extends JpaRepository<Claim, UUID> {
     
     @Query("SELECT COUNT(c) FROM Claim c WHERE c.memberId = :memberId AND c.status = :status")
     Long countClaimsByMemberAndStatus(@Param("memberId") UUID memberId, @Param("status") ClaimStatus status);
+    
+    // Complex query for claims list with filtering and pagination
+    @Query("SELECT c FROM Claim c " +
+           "JOIN Provider p ON c.providerId = p.id " +
+           "WHERE c.memberId = :memberId " +
+           "AND (:status IS NULL OR c.status IN :status) " +
+           "AND (:startDate IS NULL OR c.serviceStartDate >= :startDate) " +
+           "AND (:endDate IS NULL OR c.serviceEndDate <= :endDate) " +
+           "AND (:provider IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :provider, '%'))) " +
+           "AND (:claimNumber IS NULL OR c.claimNumber = :claimNumber) " +
+           "ORDER BY c.receivedDate DESC")
+    Page<Claim> findClaimsWithFilters(
+        @Param("memberId") UUID memberId,
+        @Param("status") List<ClaimStatus> status,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("provider") String provider,
+        @Param("claimNumber") String claimNumber,
+        Pageable pageable
+    );
 }

@@ -57,6 +57,10 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true  # For file watching on Windows
+    volumes:
+      - ./frontend/src:/app/src  # Mount source code
+      - ./frontend/public:/app/public  # Mount public folder
     networks:
       - member-benefits-network
     depends_on:

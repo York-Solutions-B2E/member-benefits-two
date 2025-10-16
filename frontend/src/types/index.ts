@@ -22,42 +22,60 @@ export interface Member {
     };
 }
 
-export interface Plan {
+export interface PlanSummaryDto {
     id: string;
     name: string;     
     type: string;         
     networkName: string;  
     planYear: number;    
 }
-  
-export interface Accumulator {
-    id: string;
-    type: string;          
-    tier: string;          
+
+export interface AccumulatorSummaryDto {
+    type: string;          // DEDUCTIBLE or OOP_MAX
+    tier: string;          // IN_NETWORK or OUT_OF_NETWORK
     limitAmount: number;    
-    usedAmount: number;         
+    usedAmount: number;    
+    remainingAmount: number; // Calculated field
 }
 
-export interface Provider {
-id: string;
-name: string;
-specialty: string;
+export interface ProviderSummaryDto {
+    id: string;
+    name: string;
+    specialty: string;
 }
 
-export interface Claim {
+export interface ClaimSummaryDto {
     id: string;
     claimNumber: string;    
-    providerId: string;
+    status: string;         // SUBMITTED, IN_REVIEW, PROCESSED, PAID, DENIED
     serviceStartDate: string;
     serviceEndDate: string;
-    status: string;         // SUBMITTED, IN_REVIEW, PROCESSED, PAID, DENIED
     totalMemberResponsibility: number;
-    provider?: Provider;
+    provider?: ProviderSummaryDto;
+}
+
+export interface ClaimsListRequest {
+  status?: string[];
+  startDate?: string;
+  endDate?: string;
+  provider?: string;
+  claimNumber?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface ClaimsListResponse {
+  content: ClaimSummaryDto[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface DashboardData {
-    user: User;
-    activePlan?: Plan;
-    accumulators?: Accumulator[];
-    recentClaims?: Claim[];
+    activePlan: PlanSummaryDto;
+    inNetworkAccumulators: AccumulatorSummaryDto[];
+    recentClaims: ClaimSummaryDto[];
 }
