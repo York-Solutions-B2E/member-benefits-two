@@ -29,13 +29,15 @@ public class Enrollment {
     @Column(name = "id", columnDefinition = "uuid")
     private UUID id;
     
-    @Column(name = "member_id", nullable = false)
-    @NotNull(message = "Member ID is required")
-    private UUID memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @NotNull(message = "Member is required")
+    private Member member;
     
-    @Column(name = "plan_id", nullable = false)
-    @NotNull(message = "Plan ID is required")
-    private UUID planId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id", nullable = false)
+    @NotNull(message = "Plan is required")
+    private Plan plan;
     
     @Column(name = "coverage_start", nullable = false)
     @NotNull(message = "Coverage start date is required")

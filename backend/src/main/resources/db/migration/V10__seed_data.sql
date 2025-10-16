@@ -85,3 +85,76 @@ SELECT
     NOW()
 FROM members m
 WHERE m.id = '550e8400-e29b-41d4-a716-446655440001';
+
+-- Add more sample claims for better dashboard testing
+INSERT INTO claims (id, claim_number, member_id, provider_id, service_start_date, service_end_date, received_date, status, total_billed, total_allowed, total_plan_paid, total_member_responsibility, updated_at)
+SELECT
+    '550e8400-e29b-41d4-a716-446655440011',
+    'C-10422',
+    m.id,
+    '550e8400-e29b-41d4-a716-446655440007',
+    '2024-08-15',
+    '2024-08-15',
+    '2024-08-16',
+    'PROCESSED',
+    450.00,
+    350.00,
+    280.00,
+    70.00,
+    NOW()
+FROM members m
+WHERE m.id = '550e8400-e29b-41d4-a716-446655440001';
+
+INSERT INTO claims (id, claim_number, member_id, provider_id, service_start_date, service_end_date, received_date, status, total_billed, total_allowed, total_plan_paid, total_member_responsibility, updated_at)
+SELECT
+    '550e8400-e29b-41d4-a716-446655440012',
+    'C-10423',
+    m.id,
+    '550e8400-e29b-41d4-a716-446655440008',
+    '2024-08-10',
+    '2024-08-12',
+    '2024-08-13',
+    'PENDING',
+    1200.00,
+    900.00,
+    0.00,
+    900.00,
+    NOW()
+FROM members m
+WHERE m.id = '550e8400-e29b-41d4-a716-446655440001';
+
+INSERT INTO claims (id, claim_number, member_id, provider_id, service_start_date, service_end_date, received_date, status, total_billed, total_allowed, total_plan_paid, total_member_responsibility, updated_at)
+SELECT
+    '550e8400-e29b-41d4-a716-446655440013',
+    'C-10424',
+    m.id,
+    '550e8400-e29b-41d4-a716-446655440006',
+    '2024-08-05',
+    '2024-08-05',
+    '2024-08-06',
+    'PROCESSED',
+    180.00,
+    120.00,
+    96.00,
+    24.00,
+    NOW()
+FROM members m
+WHERE m.id = '550e8400-e29b-41d4-a716-446655440001';
+
+INSERT INTO claims (id, claim_number, member_id, provider_id, service_start_date, service_end_date, received_date, status, total_billed, total_allowed, total_plan_paid, total_member_responsibility, updated_at)
+SELECT
+    '550e8400-e29b-41d4-a716-446655440014',
+    'C-10425',
+    m.id,
+    '550e8400-e29b-41d4-a716-446655440007',
+    '2024-07-28',
+    '2024-07-28',
+    '2024-07-29',
+    'PROCESSED',
+    320.00,
+    250.00,
+    200.00,
+    50.00,
+    NOW()
+FROM members m
+WHERE m.id = '550e8400-e29b-41d4-a716-446655440001';

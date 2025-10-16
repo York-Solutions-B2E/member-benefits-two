@@ -22,12 +22,14 @@ export interface Member {
     };
 }
 
-export interface Plan {
+export interface ActivePlan {
     id: string;
     name: string;     
     type: string;         
     networkName: string;  
-    planYear: number;    
+    planYear: number;
+    coverageStart: string;
+    coverageEnd: string;
 }
   
 export interface Accumulator {
@@ -39,25 +41,27 @@ export interface Accumulator {
 }
 
 export interface Provider {
-id: string;
-name: string;
-specialty: string;
+    id: string;
+    name: string;
+    specialty: string;
 }
 
-export interface Claim {
+export interface RecentClaim {
     id: string;
     claimNumber: string;    
-    providerId: string;
+    status: string;         // SUBMITTED, IN_REVIEW, PROCESSED, PAID, DENIED
     serviceStartDate: string;
     serviceEndDate: string;
-    status: string;         // SUBMITTED, IN_REVIEW, PROCESSED, PAID, DENIED
+    receivedDate: string;
+    totalBilled: number;
+    totalAllowed: number;
+    totalPlanPaid: number;
     totalMemberResponsibility: number;
-    provider?: Provider;
+    providerName: string;
 }
 
 export interface DashboardData {
-    user: User;
-    activePlan?: Plan;
+    activePlan?: ActivePlan;
     accumulators?: Accumulator[];
-    recentClaims?: Claim[];
+    recentClaims?: RecentClaim[];
 }

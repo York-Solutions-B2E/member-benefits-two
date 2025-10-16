@@ -1,6 +1,5 @@
 package com.memberbenefits.controller;
 
-import com.memberbenefits.domain.entity.Member;
 import com.memberbenefits.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

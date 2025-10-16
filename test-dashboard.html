@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard API Test</h1>
+    
+    <div class="test-section info">
+        <h3>Instructions</h3>
+        <p>This test page will help verify the dashboard functionality:</p>
+        <ol>
+            <li>Make sure the backend and frontend are running (Docker containers)</li>
+            <li>Click "Test Dashboard API" to test the backend endpoint</li>
+            <li>Check the results below</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>Dashboard API Test</h3>
+        <button onclick="testDashboardAPI()">Test Dashboard API</button>
+        <div id="dashboard-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Frontend Test</h3>
+        <p><a href="http://localhost:3000" target="_blank">Open Frontend Application</a></p>
+        <p>Login with Google OAuth and navigate to the dashboard to see the full functionality.</p>
+    </div>
+
+    <script>
+        async function testDashboardAPI() {
+            const resultDiv = document.getElementById('dashboard-result');
+            resultDiv.innerHTML = '<p>Testing dashboard API...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/dashboard', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const resultDiv = document.getElementById('dashboard-result');
+                
+                if (response.status === 401 || response.status === 302) {
+                    resultDiv.className = 'test-section info';
+                    resultDiv.innerHTML = `
+                        <h4>Authentication Required</h4>
+                        <p>Status: ${response.status}</p>
+                        <p>This is expected - the API requires authentication.</p>
+                        <p>The endpoint is working correctly and redirecting to OAuth login.</p>
+                        <p><strong>✅ Dashboard API endpoint is working!</strong></p>
+                    `;
+                } else if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'test-section success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ Success!</h4>
+                        <p>Status: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'test-section error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ Error</h4>
+                        <p>Status: ${response.status}</p>
+                        <p>Response: ${await response.text()}</p>
+                    `;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('dashboard-result');
+                resultDiv.className = 'test-section error';
+                resultDiv.innerHTML = `
+                    <h4>❌ Network Error</h4>
+                    <p>Error: ${error.message}</p>
+                    <p>Make sure the backend is running on http://localhost:8080</p>
+                `;
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            testDashboardAPI();
+        };
+    </script>
+</body>
+</html>

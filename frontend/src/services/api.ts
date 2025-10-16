@@ -21,7 +21,7 @@ export const authApi = {
 };
 
 export const dashboardApi = {
-  getDashboardData: (): Promise<DashboardData> => 
+  getDashboardData: (): Promise<DashboardData> =>
     api.get('/api/dashboard').then(response => response.data),
 };
 

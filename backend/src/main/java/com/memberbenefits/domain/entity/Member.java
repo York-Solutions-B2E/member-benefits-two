@@ -75,6 +75,17 @@ public class Member {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    @OneToMany(mappedBy = "memberId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Claim> claims = new ArrayList<>();
+
+    // Helper method to get active enrollment
+    public Enrollment getActiveEnrollment() {
+        return enrollments.stream()
+                .filter(Enrollment::getActive)
+                .findFirst()
+                .orElse(null);
+    }
 }

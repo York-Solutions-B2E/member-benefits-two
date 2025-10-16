@@ -43,13 +43,15 @@ public class Claim {
     @Size(max = 50, message = "Claim number must not exceed 50 characters")
     private String claimNumber; // human-friendly key for UI
     
-    @Column(name = "member_id", nullable = false)
-    @NotNull(message = "Member ID is required")
-    private UUID memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @NotNull(message = "Member is required")
+    private Member member;
     
-    @Column(name = "provider_id", nullable = false)
-    @NotNull(message = "Provider ID is required")
-    private UUID providerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    @NotNull(message = "Provider is required")
+    private Provider provider;
     
     @Column(name = "service_start_date", nullable = false)
     @NotNull(message = "Service start date is required")
