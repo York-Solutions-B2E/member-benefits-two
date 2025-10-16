@@ -2,109 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, DashboardData, AccumulatorSummaryDto, ClaimSummaryDto, PlanSummaryDto } from '../types';
 import { authApi, dashboardApi } from '../services/api';
+import Navigation from './Navigation';
 
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  // Mock data for development
-  const getMockDashboardData = (): DashboardData => ({
-    activePlan: {
-      id: "1",
-      name: "Gold PPO",
-      type: "PPO",
-      networkName: "Prime",
-      planYear: 2025
-    },
-    inNetworkAccumulators: [
-      {
-        type: "DEDUCTIBLE",
-        tier: "IN_NETWORK",
-        limitAmount: 1500,
-        usedAmount: 300,
-        remainingAmount: 1200
-      },
-      {
-        type: "OOP_MAX",
-        tier: "IN_NETWORK", 
-        limitAmount: 6000,
-        usedAmount: 1200,
-        remainingAmount: 4800
-      }
-    ],
-    recentClaims: [
-      {
-        id: "1",
-        claimNumber: "C-10421",
-        status: "PROCESSED",
-        serviceStartDate: "2024-08-29",
-        serviceEndDate: "2024-08-29",
-        totalMemberResponsibility: 45,
-        provider: {
-          id: "1",
-          name: "River Clinic",
-          specialty: "Primary Care"
-        }
-      },
-      {
-        id: "2", 
-        claimNumber: "C-10405",
-        status: "DENIED",
-        serviceStartDate: "2024-08-15",
-        serviceEndDate: "2024-08-15",
-        totalMemberResponsibility: 0,
-        provider: {
-          id: "2",
-          name: "City Imaging Center", 
-          specialty: "Radiology"
-        }
-      },
-      {
-        id: "3",
-        claimNumber: "C-10398", 
-        status: "PAID",
-        serviceStartDate: "2024-08-01",
-        serviceEndDate: "2024-08-01",
-        totalMemberResponsibility: 120,
-        provider: {
-          id: "3",
-          name: "Prime Hospital",
-          specialty: "Hospital"
-        }
-      },
-      {
-        id: "4",
-        claimNumber: "C-10375",
-        status: "IN_REVIEW", 
-        serviceStartDate: "2024-07-25",
-        serviceEndDate: "2024-07-25",
-        totalMemberResponsibility: 0,
-        provider: {
-          id: "1",
-          name: "River Clinic",
-          specialty: "Primary Care"
-        }
-      },
-      {
-        id: "5",
-        claimNumber: "C-10312",
-        status: "PAID",
-        serviceStartDate: "2024-07-15", 
-        serviceEndDate: "2024-07-15",
-        totalMemberResponsibility: 60,
-        provider: {
-          id: "2",
-          name: "City Imaging Center",
-          specialty: "Radiology"
-        }
-      }
-    ]
-  });
-
   const fetchDashboardData = useCallback(async (): Promise<void> => {
     try {
+      setLoading(true);
+      setError(null);
+
       // First get user data from /api/auth/me
       const userData = await authApi.getCurrentUser();
       setUser(userData);
@@ -117,24 +28,18 @@ const Dashboard: React.FC = () => {
         console.error('Failed to create/retrieve member:', error);
       }
       
-      // For now, use mock data instead of API call
-      // TODO: Replace with real API call when backend is ready
-      const mockData = getMockDashboardData();
-      setDashboardData(mockData);
-      console.log('Dashboard data loaded (mock):', mockData);
-      
-      // Uncomment this when backend is ready:
-      // const dashboardResponse = await dashboardApi.getDashboardData();
-      // setDashboardData(dashboardResponse);
-      // console.log('Dashboard data loaded:', dashboardResponse);
-      
+      // Get dashboard data from API only
+      const dashboardResponse = await dashboardApi.getDashboardData();
+      setDashboardData(dashboardResponse);
+      console.log('Dashboard data loaded from API:', dashboardResponse);
+    
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
-      navigate('/login');
+      console.error('Failed to fetch dashboard data from API:', error);
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -163,14 +68,6 @@ const Dashboard: React.FC = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-lg">
@@ -179,23 +76,37 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header matching the mockup */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">John Smith</span>
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation 
+          pageTitle="Dashboard" 
+          userName={user?.email ? user.email.split('@')[0] : 'User'}
+          showBreadcrumb={false}
+        />
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
             <button 
-              onClick={handleSignOut} 
-              className="text-gray-600 hover:text-gray-800 text-sm underline"
+              onClick={fetchDashboardData}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
             >
-              Sign out
+              Try Again
             </button>
           </div>
         </div>
-      </header>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Use the new Navigation component */}
+      <Navigation 
+        pageTitle="Dashboard" 
+        userName={user?.email ? user.email.split('@')[0] : 'User'}
+        showBreadcrumb={false}
+      />
       
       <main className="p-6 max-w-7xl mx-auto">
         {/* Three-column layout matching the mockup */}
@@ -273,7 +184,7 @@ const Dashboard: React.FC = () => {
                         {formatCurrency(claim.totalMemberResponsibility)}
                       </span>
                       <button 
-                        onClick={() => navigate(`/claims/${claim.claimNumber}`)}
+                        onClick={() => navigate(`/claims/${claim.id}`)}
                         className="text-blue-600 hover:text-blue-800 text-xs underline"
                       >
                         View

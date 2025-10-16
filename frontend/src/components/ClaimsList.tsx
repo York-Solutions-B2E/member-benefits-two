@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ClaimsListRequest, ClaimsListResponse, ClaimSummaryDto } from '../types';
 import { claimsApi } from '../services/api';
+import Navigation from './Navigation';
 
 const ClaimsList: React.FC = () => {
   const [claimsData, setClaimsData] = useState<ClaimsListResponse | null>(null);
@@ -149,23 +150,12 @@ const ClaimsList: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Claims</h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">John Smith</span>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Use the new Navigation component */}
+      <Navigation 
+        pageTitle="Claims" 
+        userName="John Smith"
+        showBreadcrumb={true}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Filters */}

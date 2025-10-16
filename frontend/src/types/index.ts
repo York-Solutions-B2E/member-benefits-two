@@ -79,3 +79,40 @@ export interface DashboardData {
     inNetworkAccumulators: AccumulatorSummaryDto[];
     recentClaims: ClaimSummaryDto[];
 }
+
+// New types for Claim Detail
+export interface ClaimDetail {
+  id: string;
+  claimNumber: string;
+  status: string;
+  serviceStartDate: string;
+  serviceEndDate: string;
+  provider: ProviderSummaryDto;
+  totalBilled: number;
+  totalAllowed: number;
+  totalPlanPaid: number;
+  totalMemberResponsibility: number;
+  lines: ClaimLine[];
+  statusHistory: ClaimStatusEvent[];
+}
+
+export interface ClaimLine {
+  id: string;
+  lineNumber: number;
+  cptCode: string;
+  description: string;
+  billedAmount: number;
+  allowedAmount: number;
+  deductibleApplied: number;
+  copayApplied: number;
+  coinsuranceApplied: number;
+  planPaid: number;
+  memberResponsibility: number;
+}
+
+export interface ClaimStatusEvent {
+  id: string;
+  status: string;
+  occurredAt: string;
+  note?: string;
+}

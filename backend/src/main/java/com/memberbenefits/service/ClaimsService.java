@@ -36,13 +36,13 @@ public class ClaimsService {
         // Create pageable with default sorting by received date DESC
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
         
-        // Execute the filtered query
+        // Execute the filtered query (without provider filter)
         Page<Claim> claimsPage = claimRepository.findClaimsWithFilters(
             memberId,
             request.getStatus(),
             request.getStartDate(),
             request.getEndDate(),
-            request.getProvider(),
+            request.getProvider(), // Pass but not used in query
             request.getClaimNumber(),
             pageable
         );
@@ -58,9 +58,18 @@ public class ClaimsService {
             .stream()
             .collect(Collectors.toMap(Provider::getId, provider -> provider));
         
-        // Convert claims to DTOs
+        // Convert claims to DTOs and apply provider filtering
         List<ClaimSummaryDto> claimDtos = claimsPage.getContent().stream()
             .map(claim -> convertToClaimSummaryDto(claim, providersMap.get(claim.getProviderId())))
+            .filter(dto -> {
+                // Apply provider filter if specified
+                if (request.getProvider() != null && !request.getProvider().trim().isEmpty()) {
+                    return dto.getProvider() != null && 
+                           dto.getProvider().getName().toLowerCase()
+                              .contains(request.getProvider().toLowerCase());
+                }
+                return true;
+            })
             .collect(Collectors.toList());
         
         // Build response

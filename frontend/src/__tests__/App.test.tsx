@@ -1,32 +1,81 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import App from '../App';
 
-// Mock React Router
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Routes: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Route: ({ element }: { element: React.ReactNode }) => <div>{element}</div>,
-  useLocation: () => ({ pathname: '/' }),
-  useNavigate: () => jest.fn(),
+// Mock API calls
+jest.mock('../services/api', () => ({
+  authApi: {
+    getCurrentUser: jest.fn().mockResolvedValue({
+      id: '1',
+      email: 'test@example.com',
+      authProvider: 'google',
+      authSub: 'test-sub',
+      createdAt: '2024-01-01T00:00:00Z'
+    }),
+    getCurrentMember: jest.fn().mockResolvedValue({})
+  },
+  dashboardApi: {
+    getDashboardData: jest.fn()
+  },
+  claimsApi: {
+    getClaimsList: jest.fn().mockResolvedValue({
+      content: [],
+      pageNumber: 0,
+      pageSize: 10,
+      totalElements: 0,
+      totalPages: 0,
+      first: true,
+      last: true
+    })
+  }
 }));
 
 describe('App Integration Tests', () => {
-  test('renders app with router', () => {
-    render(<App />);
-    
-    // The app should render without crashing
-    expect(document.body).toBeInTheDocument();
+  test('navigates from dashboard to claims', async () => {
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
+
+    // Wait for dashboard to load
+    await waitFor(() => {
+      expect(screen.getByText('View All Claims')).toBeInTheDocument();
+    });
+
+    // Click View All Claims
+    fireEvent.click(screen.getByText('View All Claims'));
+
+    // Should navigate to claims page
+    await waitFor(() => {
+      expect(screen.getByText('Claims')).toBeInTheDocument();
+    });
   });
 
-  test('redirects to dashboard by default', () => {
-    render(<App />);
-    
-    // Since we're using Navigate to redirect to /dashboard,
-    // the Dashboard component should be rendered
-    // We can't easily test the redirect in this setup, so we just verify the app renders
-    expect(document.body).toBeInTheDocument();
+  test('navigates using breadcrumb', async () => {
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
+
+    // Navigate to claims first
+    await waitFor(() => {
+      expect(screen.getByText('View All Claims')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('View All Claims'));
+
+    // Click Dashboard in breadcrumb
+    await waitFor(() => {
+      const dashboardLink = screen.getByText('Dashboard');
+      fireEvent.click(dashboardLink);
+    });
+
+    // Should navigate back to dashboard
+    await waitFor(() => {
+      expect(screen.getByText('Active Plan')).toBeInTheDocument();
+    });
   });
 });

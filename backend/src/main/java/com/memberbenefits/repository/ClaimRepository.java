@@ -27,6 +27,8 @@ public interface ClaimRepository extends JpaRepository<Claim, UUID> {
     
     Optional<Claim> findByClaimNumber(String claimNumber);
     
+    Optional<Claim> findByMemberIdAndClaimNumber(UUID memberId, String claimNumber);
+    
     List<Claim> findByReceivedDateBetween(LocalDate startDate, LocalDate endDate);
     
     List<Claim> findByServiceStartDateBetween(LocalDate startDate, LocalDate endDate);
@@ -40,14 +42,12 @@ public interface ClaimRepository extends JpaRepository<Claim, UUID> {
     @Query("SELECT COUNT(c) FROM Claim c WHERE c.memberId = :memberId AND c.status = :status")
     Long countClaimsByMemberAndStatus(@Param("memberId") UUID memberId, @Param("status") ClaimStatus status);
     
-    // Complex query for claims list with filtering and pagination
+    // Simple query without JOIN - handle provider filtering in service layer
     @Query("SELECT c FROM Claim c " +
-           "JOIN Provider p ON c.providerId = p.id " +
            "WHERE c.memberId = :memberId " +
            "AND (:status IS NULL OR c.status IN :status) " +
            "AND (:startDate IS NULL OR c.serviceStartDate >= :startDate) " +
            "AND (:endDate IS NULL OR c.serviceEndDate <= :endDate) " +
-           "AND (:provider IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :provider, '%'))) " +
            "AND (:claimNumber IS NULL OR c.claimNumber = :claimNumber) " +
            "ORDER BY c.receivedDate DESC")
     Page<Claim> findClaimsWithFilters(
@@ -55,7 +55,7 @@ public interface ClaimRepository extends JpaRepository<Claim, UUID> {
         @Param("status") List<ClaimStatus> status,
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate,
-        @Param("provider") String provider,
+        @Param("provider") String provider, // Keep for compatibility but don't use
         @Param("claimNumber") String claimNumber,
         Pageable pageable
     );
