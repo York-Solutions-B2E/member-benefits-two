@@ -8,6 +8,17 @@ const api = axios.create({
   withCredentials: true, // Important for session-based auth
 });
 
+// Response interceptor for handling 401/403 errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authApi = {
   getCurrentUser: (): Promise<User> => 
     api.get('/api/auth/me').then(response => response.data),

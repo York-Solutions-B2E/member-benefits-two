@@ -1,38 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { User, DashboardData, AccumulatorSummaryDto, ClaimSummaryDto, PlanSummaryDto } from '../types';
 import { authApi, dashboardApi } from '../services/api';
 import Navigation from './Navigation';
 
 const Dashboard: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-
+  
   const fetchDashboardData = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
-      // First get user data from /api/auth/me
-      const userData = await authApi.getCurrentUser();
-      setUser(userData);
-      
-      // Force member creation by calling /api/auth/member
-      try {
-        await authApi.getCurrentMember();
-        console.log('Member record created/retrieved');
-      } catch (error) {
-        console.error('Failed to create/retrieve member:', error);
-      }
-      
       // Get dashboard data from API only
       const dashboardResponse = await dashboardApi.getDashboardData();
       setDashboardData(dashboardResponse);
       console.log('Dashboard data loaded from API:', dashboardResponse);
-    
     } catch (error) {
       console.error('Failed to fetch dashboard data from API:', error);
       setError('Failed to load dashboard data. Please try again.');
