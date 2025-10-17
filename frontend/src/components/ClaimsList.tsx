@@ -153,7 +153,6 @@ const ClaimsList: React.FC = () => {
       {/* Use the new Navigation component */}
       <Navigation 
         pageTitle="Claims" 
-        userName="John Smith"
         showBreadcrumb={true}
       />
 

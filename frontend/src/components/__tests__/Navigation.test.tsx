@@ -22,7 +22,7 @@ describe('Navigation Component', () => {
   });
 
   test('renders user name when provided', () => {
-    renderWithRouter(<Navigation pageTitle="Test" userName="John Doe" />);
+    renderWithRouter(<Navigation pageTitle="Test" displayName="John Doe" />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 

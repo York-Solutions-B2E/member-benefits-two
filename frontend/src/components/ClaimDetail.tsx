@@ -97,10 +97,7 @@ const ClaimDetail: React.FC = () => {
             console.log('Claim detail loaded from API:', response);
           } catch (apiError) {
             console.error('Failed to fetch claim detail from API, using mock data:', apiError);
-            // Fallback to mock data if API fails
-            const mockData = getMockClaimDetail();
-            setClaimDetail(mockData);
-            console.log('Claim detail loaded (mock fallback):', mockData);
+            setError('Failed to load claim details. Please try again.');
           }
         }
         
@@ -201,8 +198,7 @@ const ClaimDetail: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Use the new Navigation component */}
       <Navigation 
-        pageTitle="Claim Detail" 
-        userName="John Smith"
+        pageTitle="Claim Detail"
         showBreadcrumb={true}
       />
 

@@ -1,17 +1,21 @@
+import { useAuth } from 'contexts/AuthContext';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NavigationProps {
   pageTitle: string;
-  userName?: string;
+  displayName?: string;
   showBreadcrumb?: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ 
   pageTitle, 
-  userName = 'John Smith',
+  displayName,
   showBreadcrumb = true 
 }) => {
+  const { user } = useAuth();
+
+  const finalDisplayName = displayName || ( user ? `${user.email}` : 'User')
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -107,12 +111,12 @@ const Navigation: React.FC<NavigationProps> = ({
             {/* User info */}
             <div className="hidden sm:flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{userName}</p>
+                <p className="text-sm font-medium text-gray-900">{finalDisplayName}</p>
                 <p className="text-xs text-gray-500">Member</p>
               </div>
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
-                  {userName.split(' ').map(n => n[0]).join('')}
+                  {finalDisplayName.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
             </div>
@@ -225,11 +229,11 @@ const Navigation: React.FC<NavigationProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {userName.split(' ').map(n => n[0]).join('')}
+                    {finalDisplayName.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{userName}</p>
+                  <p className="text-sm font-medium text-gray-900">{finalDisplayName}</p>
                   <p className="text-xs text-gray-500">Member</p>
                 </div>
               </div>

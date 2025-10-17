@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/claims")
 @RequiredArgsConstructor
@@ -21,19 +23,19 @@ public class ClaimDetailController {
     private final ClaimDetailService claimDetailService;
     private final AuthService authService;
     
-    @GetMapping("/{claimNumber}")
+    @GetMapping("/{claimId}")
     @Operation(
         summary = "Get claim detail",
         description = "Returns detailed information for a specific claim including line items and status history"
     )
     public ResponseEntity<ClaimDetailDto> getClaimDetail(
-            @PathVariable String claimNumber,
+            @PathVariable String claimId,
             Authentication authentication) {
-        log.debug("Getting claim detail for claim: {} and user: {}", claimNumber, authentication.getName());
+        log.debug("Getting claim detail for claim ID: {} and user: {}", claimId, authentication.getName());
         
         return authService.getCurrentMember(authentication)
             .map(member -> {
-                ClaimDetailDto response = claimDetailService.getClaimDetail(member.getId(), claimNumber);
+                ClaimDetailDto response = claimDetailService.getClaimDetailById(member.getId(), UUID.fromString(claimId));
                 return ResponseEntity.ok(response);
             })
             .orElse(ResponseEntity.notFound().build());

@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <Navigation 
           pageTitle="Dashboard" 
-          userName={user?.email ? user.email.split('@')[0] : 'User'}
+          displayName={user?.email ? user.email.split('@')[0] : 'User'}
           showBreadcrumb={false}
         />
         <div className="flex justify-center items-center h-64">
@@ -92,7 +92,7 @@ const Dashboard: React.FC = () => {
       {/* Use the new Navigation component */}
       <Navigation 
         pageTitle="Dashboard" 
-        userName={user?.email ? user.email.split('@')[0] : 'User'}
+        displayName={user?.email ? user.email.split('@')[0] : 'User'}
         showBreadcrumb={false}
       />
       

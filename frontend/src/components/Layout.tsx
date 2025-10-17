@@ -11,14 +11,14 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ 
   children, 
   pageTitle, 
-  userName = 'John Smith',
+  userName,
   showBreadcrumb = true 
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation 
         pageTitle={pageTitle}
-        userName={userName}
+        displayName={userName}
         showBreadcrumb={showBreadcrumb}
       />
       {children}
