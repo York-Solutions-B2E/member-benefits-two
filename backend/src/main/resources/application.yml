@@ -41,6 +41,8 @@ spring:
               - profile
               - email
             redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth

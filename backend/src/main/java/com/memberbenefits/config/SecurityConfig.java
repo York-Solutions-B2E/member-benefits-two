@@ -21,11 +21,14 @@ public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final OAuth2AuthenticationSuccessHandler oauth2SuccessHandler;
 
     public SecurityConfig(CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
-                         CustomAccessDeniedHandler customAccessDeniedHandler) {
+            CustomAccessDeniedHandler customAccessDeniedHandler,
+            OAuth2AuthenticationSuccessHandler oauth2SuccessHandler) {
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.oauth2SuccessHandler = oauth2SuccessHandler;
     }
 
     @Bean
@@ -44,6 +47,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/refresh").authenticated()
+                .requestMatchers("/api/auth/logout").authenticated()
                 .requestMatchers("/api/dashboard").authenticated()
                 .requestMatchers("/api/claims/**").authenticated()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -56,7 +61,7 @@ public class SecurityConfig {
                 .accessDeniedHandler(customAccessDeniedHandler)
             )
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("http://localhost:3000/dashboard", true)
+                .successHandler(oauth2SuccessHandler)
                 .failureUrl("http://localhost:3000/login?error=true")
             )
             .logout(logout -> logout

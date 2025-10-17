@@ -6,9 +6,9 @@ import com.memberbenefits.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +21,7 @@ import java.util.Optional;
 public class AuthService {
     
     private final UserRepository userRepository;
+    private final MemberService memberService;
     
     @Transactional
     public User getOrCreateUserFromOidcUser(OidcUser oidcUser) {
@@ -48,17 +49,36 @@ public class AuthService {
     }
     
     public Optional<User> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof OidcUser)) {
-            log.debug("Authentication is null or not OidcUser: {}", authentication);
+        if (authentication == null) {
+            log.debug("Authentication is null");
             return Optional.empty();
         }
         
-        OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-        return Optional.of(getOrCreateUserFromOidcUser(oidcUser));
+        Object principal = authentication.getPrincipal();
+        
+        if (principal instanceof OidcUser) {
+            OidcUser oidcUser = (OidcUser) principal;
+            return Optional.of(getOrCreateUserFromOidcUser(oidcUser));
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            return Optional.of(getOrCreateUserFromOAuth2User(oauth2User));
+        } else {
+            log.debug("Authentication principal is neither OidcUser nor OAuth2User: {}", principal.getClass());
+            return Optional.empty();
+        }
     }
 
-    @Autowired
-    private MemberService memberService;
+    @Transactional
+    public User getOrCreateUserFromOAuth2User(OAuth2User oauth2User) {
+        String authProvider = "google";
+        String authSub = oauth2User.getName(); // This is the subject ID
+        String email = oauth2User.getAttribute("email");
+        
+        log.debug("Processing OAuth2 user for authSub: {}, email: {}", authSub, email);
+        
+        return userRepository.findByAuthProviderAndAuthSub(authProvider, authSub)
+            .orElseGet(() -> createNewUser(authProvider, authSub, email));
+    }
     
     public Optional<Member> getCurrentMember(Authentication authentication) {
         Optional<User> user = getCurrentUser(authentication);

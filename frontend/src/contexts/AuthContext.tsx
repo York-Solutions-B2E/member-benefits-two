@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { authApi } from '../services/api';
+import TokenStorage from '../services/tokenStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +10,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  refreshTokens: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,8 +35,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   };
 
-  const logout = () => {
-    window.location.href = 'http://localhost:8080/logout';
+  const logout = async () => {
+    try {
+      // Clear tokens from storage
+      TokenStorage.clearTokens();
+      
+      // Call backend logout endpoint
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Redirect to login page
+      window.location.href = 'http://localhost:8080/logout';
+    }
+  };
+
+  const refreshTokens = async (): Promise<boolean> => {
+    try {
+      const refreshToken = TokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        return false;
+      }
+      
+      const response = await authApi.refreshToken();
+      
+      if (response.success) {
+        // Token refresh successful
+        return true;
+      } else {
+        // Token refresh failed
+        TokenStorage.clearTokens();
+        return false;
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      TokenStorage.clearTokens();
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -47,7 +84,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isLoading,
     login,
     logout,
-    checkAuth
+    checkAuth,
+    refreshTokens
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

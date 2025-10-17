@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { User, DashboardData, Member, ClaimsListRequest, ClaimsListResponse, ClaimDetail, ClaimLine, ClaimStatusEvent } from '../types';
+import TokenStorage from './tokenStorage';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -55,19 +56,24 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Attempt to refresh the session by calling the auth endpoint
-        await api.get('/api/auth/me');
-        
-        // If successful, process queued requests
-        processQueue(null);
-        return api(originalRequest);
+        // Try to refresh token using the refresh endpoint
+        const refreshToken = TokenStorage.getRefreshToken();
+        if (refreshToken) {
+          await api.post('/api/auth/refresh');
+          
+          // Process queued requests
+          processQueue(null);
+          return api(originalRequest);
+        } else {
+          throw new Error('No refresh token available');
+        }
       } catch (refreshError) {
         // Refresh failed, redirect to login
         processQueue(refreshError, null);
+        TokenStorage.clearTokens();
         
         // Show user-friendly error message
         if (window.location.pathname !== '/login') {
-          // You might want to show a toast notification here
           console.warn('Session expired. Please log in again.');
           window.location.href = '/login';
         }
@@ -103,9 +109,11 @@ export const authApi = {
   getCurrentMember: (): Promise<Member> => 
     api.get('/api/auth/member').then(response => response.data),
 
+  refreshToken: (): Promise<any> => 
+    api.post('/api/auth/refresh').then(response => response.data),
 
   logout: (): Promise<void> => 
-    api.post('/logout').then(response => response.data),
+    api.post('/api/auth/logout').then(response => response.data),
 };
 
 export const dashboardApi = {
