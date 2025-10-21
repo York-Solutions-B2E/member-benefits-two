@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClaimDetail as ClaimDetailType } from '../types';
-import { claimsApi } from '../services/api';
+import { claimsApi, downloadEob } from '../services/api';
 import Navigation from './Navigation';
 
 const ClaimDetail: React.FC = () => {
@@ -156,8 +156,22 @@ const ClaimDetail: React.FC = () => {
     navigate('/claims');
   };
 
-  const handleDownloadEOB = () => {
-    // TODO: Implement EOB download
+  const handleDownloadEOB = async () => {
+    if (!claimDetail) return;
+
+    try {
+      const blob = await downloadEob(claimDetail.id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EOB_${claimDetail.claimNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading EOB:', error);
+    }
     console.log('Download EOB for claim:', claimDetail?.claimNumber);
   };
 

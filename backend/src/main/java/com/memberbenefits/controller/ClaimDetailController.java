@@ -3,10 +3,13 @@ package com.memberbenefits.controller;
 import com.memberbenefits.dto.ClaimDetailDto;
 import com.memberbenefits.service.AuthService;
 import com.memberbenefits.service.ClaimDetailService;
+import com.memberbenefits.service.EobService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,7 @@ public class ClaimDetailController {
     
     private final ClaimDetailService claimDetailService;
     private final AuthService authService;
+    private final EobService eobService;
     
     @GetMapping("/{claimId}")
     @Operation(
@@ -40,5 +44,26 @@ public class ClaimDetailController {
             })
             .orElse(ResponseEntity.notFound().build());
     }
-}
 
+    @GetMapping("/{claimId}/eob")
+    @Operation(summary = "Download EOB PDF", description = "Downloads the EOB PDF for a specific claim")
+    public ResponseEntity<byte[]> downloadEob(
+            @PathVariable String claimId,
+            Authentication authentication) {
+        
+        return authService.getCurrentMember(authentication)
+            .map(member -> {
+                byte[] eob = eobService.generateEobPdf(member.getId(), UUID.fromString(claimId));
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.setContentDispositionFormData("attachment", 
+                    "EOB_" + claimId + ".pdf");
+            
+                return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(eob);
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+}
