@@ -253,3 +253,18 @@ VALUES
     ('550e8400-e29b-41d4-a716-446655440032', '550e8400-e29b-41d4-a716-446655440010', 'PROCESSED', '2024-09-02 09:15:00+00', 'Claim processed and approved'),
     ('550e8400-e29b-41d4-a716-446655440033', '550e8400-e29b-41d4-a716-446655440010', 'PAID', '2024-09-03 11:45:00+00', 'Payment issued to provider')
 ON CONFLICT (id) DO NOTHING;
+
+
+-- Documents table for EOB storage
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    file_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(255) NOT NULL,
+    storage_path VARCHAR(255) NOT NULL,
+    member_id UUID NOT NULL REFERENCES members(id),
+    claim_id UUID REFERENCES claims(id),
+    uploaded_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_document_member_id ON documents (member_id);
+CREATE INDEX idx_document_claim_id ON documents (claim_id);

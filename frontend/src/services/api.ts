@@ -121,4 +121,17 @@ export const claimsApi = {
     api.get(`/api/claims/${claimId}`).then(response => response.data),
 };
 
+export const downloadEob = async (claimId: string): Promise<Blob> => {
+  const response = await fetch(`${API_BASE_URL}/api/claims/${claimId}/eob`, {
+    method: 'GET',
+    credentials: 'include', // Include session cookies
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to download EOB');
+  }
+  
+  return response.blob();
+};
+
 export default api;
