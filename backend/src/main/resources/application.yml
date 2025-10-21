@@ -51,6 +51,17 @@ spring:
         jwt:
           issuer-uri: https://accounts.google.com
 
+# GraphQL Configuration
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true
+    cors:
+      allowed-origins: http://localhost:3000
+      allowed-methods: GET,POST,OPTIONS
+      allowed-headers: "*"
+      allowed-credentials: true
+
 # Custom application properties
 app:
   google:

@@ -46,6 +46,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/dashboard").authenticated()
                 .requestMatchers("/api/claims/**").authenticated()
+                .requestMatchers("/graphql").authenticated() // GraphQL requires authentication
+                .requestMatchers("/graphiql").permitAll() // GraphQL playground is public
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/oauth2/**", "/login/**").permitAll()

@@ -1,0 +1,61 @@
+type Query {
+    claims(filters: ClaimsFilter, pagination: PaginationInput): ClaimsConnection
+    claim(id: ID!): Claim
+}
+
+type ClaimsConnection {
+    edges: [ClaimEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ClaimEdge {
+    node: Claim!
+    cursor: String!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+}
+
+type Claim {
+    id: ID!
+    claimNumber: String!
+    status: ClaimStatus!
+    serviceStartDate: String!
+    serviceEndDate: String!
+    totalMemberResponsibility: Float!
+    provider: Provider
+}
+
+type Provider {
+    id: ID!
+    name: String!
+    specialty: String
+}
+
+enum ClaimStatus {
+    SUBMITTED
+    IN_REVIEW
+    PROCESSED
+    PAID
+    DENIED
+}
+
+input ClaimsFilter {
+    status: [ClaimStatus!]
+    startDate: String
+    endDate: String
+    provider: String
+    claimNumber: String
+}
+
+input PaginationInput {
+    first: Int
+    after: String
+    last: Int
+    before: String
+}
