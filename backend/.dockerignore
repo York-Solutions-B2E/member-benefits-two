@@ -1,0 +1,8 @@
+target/
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+hs_err_pid*.log
+replay_pid*.log

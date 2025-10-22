@@ -10,13 +10,13 @@ COPY .mvn .mvn
 COPY pom.xml .
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
+RUN ./mvnw dependency:go-offline -B --batch-mode --no-transfer-progress
 
 # Copy source code
 COPY src src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN ./mvnw clean package -DskipTests --batch-mode --no-transfer-progress
 
 # Expose port 8080
 EXPOSE 8080

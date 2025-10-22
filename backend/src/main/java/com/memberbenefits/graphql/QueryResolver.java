@@ -3,30 +3,35 @@ package com.memberbenefits.graphql;
 import com.memberbenefits.domain.entity.Member;
 import com.memberbenefits.dto.ClaimsListRequest;
 import com.memberbenefits.dto.ClaimsListResponse;
+import com.memberbenefits.dto.ClaimDetailDto;
 import com.memberbenefits.graphql.dto.ClaimsConnection;
 import com.memberbenefits.graphql.dto.ClaimsFilter;
 import com.memberbenefits.graphql.dto.PaginationInput;
 import com.memberbenefits.service.AuthService;
 import com.memberbenefits.service.ClaimsService;
+import com.memberbenefits.service.ClaimDetailService;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class QueryResolver implements GraphQLQueryResolver {
+public class QueryResolver implements GraphQLQueryResolver{
     
     private final ClaimsService claimsService;
+    private final ClaimDetailService claimDetailService;
     private final AuthService authService;
     
-    public ClaimsConnection claims(ClaimsFilter filters, PaginationInput pagination, Authentication authentication) {
+    public ClaimsConnection claims(ClaimsFilter filters, PaginationInput pagination) {
         log.debug("GraphQL claims query with filters: {}, pagination: {}", filters, pagination);
         
         try {
-            // Get current member
+            // Get current member from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Member member = authService.getCurrentMember(authentication)
                 .orElseThrow(() -> new RuntimeException("User not authenticated"));
             
@@ -41,6 +46,26 @@ public class QueryResolver implements GraphQLQueryResolver {
         } catch (Exception e) {
             log.error("Error processing GraphQL claims query", e);
             throw new RuntimeException("Failed to fetch claims: " + e.getMessage());
+        }
+    }
+    
+    public com.memberbenefits.graphql.dto.Claim claim(String id) {
+        log.debug("GraphQL claim query for id: {}", id);
+        
+        try {
+            // Get current member from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Member member = authService.getCurrentMember(authentication)
+                .orElseThrow(() -> new RuntimeException("User not authenticated"));
+            
+            // Get claim from service
+            ClaimDetailDto claimDto = claimDetailService.getClaimDetailById(member.getId(), java.util.UUID.fromString(id));
+            
+            // Convert to GraphQL response
+            return new com.memberbenefits.graphql.dto.Claim(claimDto);
+        } catch (Exception e) {
+            log.error("Error processing GraphQL claim query", e);
+            throw new RuntimeException("Failed to fetch claim: " + e.getMessage());
         }
     }
     

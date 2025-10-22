@@ -1,27 +1,48 @@
 import React from 'react';
+import { ApolloProvider } from '@apollo/client/react';
+import { client } from './graphql/client';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import ClaimsList from './components/ClaimsList';
+import ClaimsListGraphQL from './components/ClaimsListGraphQL';
 import ClaimDetail from './components/ClaimDetail';
+import Layout from './components/Layout';
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <div>
+    <ApolloProvider client={client}>
+      <AuthProvider>
+        <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/claims" element={<ProtectedRoute><ClaimsList /></ProtectedRoute>} />
-            <Route path="/claims/:claimId" element={<ProtectedRoute><ClaimDetail /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Layout pageTitle="Dashboard">
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/claims" element={
+              <ProtectedRoute>
+                <Layout pageTitle="Claims">
+                  <ClaimsListGraphQL />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/claims/:id" element={
+              <ProtectedRoute>
+                <Layout pageTitle="Claim Detail">
+                  <ClaimDetail />
+                </Layout>
+              </ProtectedRoute>
+            } />
           </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+        </Router>
+      </AuthProvider>
+    </ApolloProvider>
   );
 };
 

@@ -67,11 +67,6 @@ const Dashboard: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation 
-          pageTitle="Dashboard" 
-          displayName={user?.email || 'User'}
-          showBreadcrumb={false}
-        />
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -89,13 +84,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Use the new Navigation component */}
-      <Navigation 
-        pageTitle="Dashboard" 
-        displayName={user?.email || 'User'}
-        showBreadcrumb={false}
-      />
-      
       <main className="p-6 max-w-7xl mx-auto">
         {/* Three-column layout matching the mockup */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
