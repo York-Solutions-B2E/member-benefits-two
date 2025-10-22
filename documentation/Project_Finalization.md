@@ -12,7 +12,6 @@ Documentation
 - Data dictionary for database schema
 
 Missing Stretch Goals
-- EOB PDF download functionality
 - GraphQL endpoint
 - HTTP caching headers
 - Enhanced accessibility features
@@ -24,7 +23,6 @@ Missing Stretch Goals
 2. Complete Sign-Out Implementation
 
 #### Nice To Haves
-1. EOB PDF Download (Stretch Goal)
 2. Enhanced UX Features
 3. GraphQL Implementation
 4. Advanced Testing

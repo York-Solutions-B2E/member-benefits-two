@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types';
+import { User, Member } from '../types';
 import { authApi } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
+  member: Member | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: () => void;
@@ -15,19 +16,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [member, setMember] = useState<Member | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const checkAuth = async () => {
-        try {
-            setIsLoading(true);
-            const userData = await authApi.getCurrentUser();
-            setUser(userData);
-        } catch (error) {
-            setUser(null);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      try {
+          setIsLoading(true);
+          const [userData, memberData] = await Promise.all([
+              authApi.getCurrentUser(),
+              authApi.getCurrentMember()
+          ]);
+          setUser(userData);
+          setMember(memberData);
+      } catch (error) {
+          setUser(null);
+          setMember(null);
+      } finally {
+          setIsLoading(false);
+      }
+  };
 
     const login = () => {
         window.location.href = 'http://localhost:8080/oauth2/authorization/google';
@@ -43,6 +50,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const value = {
     user,
+    member,
     isAuthenticated: !!user,
     isLoading,
     login,
