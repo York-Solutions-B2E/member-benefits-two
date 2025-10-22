@@ -142,9 +142,9 @@ const ClaimDetail: React.FC = () => {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'PAID': return 'bg-green-100 text-green-800';
+      case 'PAID': return 'bg-gray-100 text-gray-800';
       case 'PROCESSED': return 'bg-blue-100 text-blue-800';
-      case 'IN_REVIEW': return 'bg-yellow-100 text-yellow-800';
+      case 'IN_REVIEW': return 'bg-blue-100 text-blue-800';
       case 'DENIED': return 'bg-red-100 text-red-800';
       case 'SUBMITTED': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -216,184 +216,269 @@ const ClaimDetail: React.FC = () => {
         showBreadcrumb={true}
       />
 
-      <main className="p-6 max-w-7xl mx-auto">
-        {/* Claim Header */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Claim #{claimDetail.claimNumber}
-              </h2>
-              <div className="mt-2 flex items-center gap-4">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claimDetail.status)}`}>
-                  {claimDetail.status.replace('_', ' ')}
-                </span>
-                <span className="text-gray-600">
-                  Service: {formatDate(claimDetail.serviceStartDate)}
-                  {claimDetail.serviceStartDate !== claimDetail.serviceEndDate && 
-                    `–${formatDate(claimDetail.serviceEndDate)}`
-                  }
-                </span>
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Sidebar Layout */}
+        <div className="flex gap-6">
+          
+          {/* Left Sidebar - Financial Summary */}
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Financial Summary</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Total Billed */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Total Billed</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatCurrency(claimDetail.totalBilled)}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Allowed Amount */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Allowed Amount</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatCurrency(claimDetail.totalAllowed)}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Plan Paid */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Plan Paid</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatCurrency(claimDetail.totalPlanPaid)}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Member Responsibility - Highlighted */}
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border border-blue-200">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-blue-600 font-medium">Member Responsibility</p>
+                      <p className="text-xl font-bold text-blue-900">
+                        {formatCurrency(claimDetail.totalMemberResponsibility)}
+                      </p>
+                    </div>
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 space-y-3">
+                <button
+                  onClick={handleDownloadEOB}
+                  className="w-full bg-gradient-to-tr from-blue-700 via-blue-600 to-blue-400 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Download EOB PDF</span>
+                </button>
+                
+                <button
+                  onClick={handleBackToClaims}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>Back to Claims</span>
+                </button>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Provider</p>
-              <p className="font-medium text-gray-900">{claimDetail.provider.name}</p>
-              <p className="text-sm text-gray-600">{claimDetail.provider.specialty}</p>
-            </div>
           </div>
 
-          {/* Status Timeline */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Timeline</h3>
-            <div className="flex items-center space-x-4 overflow-x-auto">
-              {claimDetail.statusHistory.map((event, index) => (
-                <div key={event.id} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div className={`w-3 h-3 rounded-full ${
-                      index <= claimDetail.statusHistory.findIndex(e => e.status === claimDetail.status) 
-                        ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}></div>
-                    <span className={`text-xs mt-1 ${
-                      index <= claimDetail.statusHistory.findIndex(e => e.status === claimDetail.status)
-                        ? 'text-blue-600 font-medium' : 'text-gray-500'
-                    }`}>
-                      {event.status.replace('_', ' ')}
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1">
-                      {formatDateTime(event.occurredAt)}
+          {/* Right Content - Claim Details */}
+          <div className="flex-1 min-w-0 space-y-6">
+            
+            {/* Claim Header and Status Timeline */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-2 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">Claim Details</h2>
+                      <p className="text-sm text-gray-600">#{claimDetail.claimNumber}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claimDetail.status)}`}>
+                      {claimDetail.status.replace('_', ' ')}
                     </span>
                   </div>
-                  {index < claimDetail.statusHistory.length - 1 && (
-                    <div className="w-8 h-0.5 bg-gray-300 mx-2"></div>
-                  )}
                 </div>
-              ))}
+              </div>
+
+              <div className="p-6">
+                {/* Claim Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Claim #{claimDetail.claimNumber}
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">Service Date:</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatDate(claimDetail.serviceStartDate)}
+                          {claimDetail.serviceStartDate !== claimDetail.serviceEndDate && 
+                            `–${formatDate(claimDetail.serviceEndDate)}`
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right md:text-left">
+                    <p className="text-sm text-gray-600">Provider</p>
+                    <p className="font-medium text-gray-900">{claimDetail.provider.name}</p>
+                    <p className="text-sm text-gray-600">{claimDetail.provider.specialty}</p>
+                  </div>
+                </div>
+
+                {/* Status Timeline */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Timeline</h3>
+                  <div className="flex items-center space-x-4 overflow-x-auto pb-2">
+                    {claimDetail.statusHistory.map((event, index) => (
+                      <div key={event.id} className="flex items-center">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-4 h-4 rounded-full ${
+                            index <= claimDetail.statusHistory.findIndex(e => e.status === claimDetail.status) 
+                              ? 'bg-blue-600' : 'bg-gray-300'
+                          }`}></div>
+                          <span className={`text-xs mt-2 font-medium ${
+                            index <= claimDetail.statusHistory.findIndex(e => e.status === claimDetail.status)
+                              ? 'text-blue-600' : 'text-gray-500'
+                          }`}>
+                            {event.status.replace('_', ' ')}
+                          </span>
+                          <span className="text-xs text-gray-500 mt-1 text-center">
+                            {formatDateTime(event.occurredAt)}
+                          </span>
+                        </div>
+                        {index < claimDetail.statusHistory.length - 1 && (
+                          <div className="w-12 h-0.5 bg-gray-300 mx-3"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Line Items */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-stone-400 via-stone-200 to-stone-100 px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+                    <p className="text-sm text-gray-800">{claimDetail.lines.length} service(s)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        CPT
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Billed
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Allowed
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ded
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Copay
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Coins
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Plan Paid
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        You Pay
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {claimDetail.lines.map((line) => (
+                      <tr key={line.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {line.cptCode}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {line.description}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.billedAmount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.allowedAmount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.deductibleApplied)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.copayApplied)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.coinsuranceApplied)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatCurrency(line.planPaid)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                          {formatCurrency(line.memberResponsibility)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Financial Summary */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Total Billed</p>
-              <p className="text-xl font-semibold text-gray-900">
-                {formatCurrency(claimDetail.totalBilled)}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Allowed Amount</p>
-              <p className="text-xl font-semibold text-gray-900">
-                {formatCurrency(claimDetail.totalAllowed)}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Plan Paid</p>
-              <p className="text-xl font-semibold text-gray-900">
-                {formatCurrency(claimDetail.totalPlanPaid)}
-              </p>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-600 mb-1">Member Responsibility</p>
-              <p className="text-xl font-semibold text-blue-900">
-                {formatCurrency(claimDetail.totalMemberResponsibility)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Line Items */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Line Items</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    CPT
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Billed
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Allowed
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ded
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Copay
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Coins
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Plan Paid
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    You Pay
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {claimDetail.lines.map((line) => (
-                  <tr key={line.id}>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {line.cptCode}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {line.description}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.billedAmount)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.allowedAmount)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.deductibleApplied)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.copayApplied)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.coinsuranceApplied)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {formatCurrency(line.planPaid)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                      {formatCurrency(line.memberResponsibility)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={handleBackToClaims}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-          >
-            ← Back to Claims
-          </button>
-          
-          <button
-            onClick={handleDownloadEOB}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-          >
-            Download EOB PDF
-          </button>
-        </div>
-      </main>
+      </div>
     </div>
   );
 };
