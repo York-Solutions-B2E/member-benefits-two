@@ -26,21 +26,55 @@
 backend/src/main/java/com/memberbenefits/
 ├── config/           # Configuration classes
 ├── controller/       # REST API endpoints
-├── domain/          # Entity models and DTOs
-│   ├── entity/      # JPA entities
-│   ├── embeddable/  # Embedded objects
-│   └── enums/       # Enumeration types
-├── dto/             # Data Transfer Objects
-├── repository/      # Data access layer
-└── service/        # Business logic layer
+├── domain/           # Entity models and DTOs
+│   ├── entity/       # JPA entities
+│   ├── embeddable/   # Embedded objects
+│   └── enums/        # Enumeration types
+├── dto/              # Data Transfer Objects
+├── repository/       # Data access layer
+└── service/          # Business logic layer
 ```
 
 ## Spring Boot Application Structure
 **Architecture Pattern**
 A Spring Boot project follows a 3-tier architecture:
+
 1. Presentation Layer (**Controllers**)
+```bash
+The entry point for all HTTP requests, handling
+- Request Mapping
+- Input Validation
+- Auth/Authorization
+- Response Formatting
+- Error Handling  
+
+Controller Responsibilities
+- Request handling maps HTTP GET requests
+- Logic is delegated to serice layer
+- Manages response management for control over HTTP response
+```
+
 2. Business Logic (**Services**)
+```bash
+Contains core logic and sends to different components
+- Business Rules/Logic
+- Transaction Management (Consistent Data)
+- Sends to repositories as needed
+- Data Transformation (Entity to DTO)
+```
+
 3. Data Access Layer (**Repositories**)
+```bash
+Abstract database access and data operations
+- CRUD Operations
+- Query Abstraction (Hides complex SQL)
+- Database
+```
+```
+// Spring Data JPA automatically generates queries based on method names
+Optional<Member> findByUserId(UUID userId);
+// Generated SQL: SELECT * FROM members WHERE user_id = ? 
+```
 
 **Data Flow**
 ```mermaid
@@ -157,6 +191,30 @@ Transfers data between objects and layers without exposing internal entity struc
 - Prevents hibernate from modifying schema
 - Flyway handles database migration
 - PostrgeSQL dialect config
+
+**2. Database Schema (Flyway Migration)**
+Defined a universal database schema for migrations
+**Key Tables:**
+- `users`
+- `members`
+- `plans`
+- `enrollments`
+- `claims`
+- `claim_lines`
+- `accumulators`
+- `providers`
+
 ## Security Implementation
 
 ## API Endpoints
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/auth/me` | Get current user info | Required |
+| GET | `/api/auth/member` | Get current member info | Required |
+| GET | `/api/dashboard` | Get dashboard data | Required |
+| GET | `/api/claims` | Get claims list with filters | Required |
+| GET | `/api/claims/{claimId}` | Get claim details | Required |
+| GET | `/api/claims/{claimId}/eob` | Download EOB PDF | Required |
+| GET | `/swagger-ui/**` | API documentation | None |
+| GET | `/actuator/health` | Health check | None |
+| GET | `/oauth2/**` | OAuth2 endpoints | None |

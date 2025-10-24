@@ -21,22 +21,28 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Dashboard", description = "Dashboard data endpoints")
 public class DashboardController {
     
+    // Dependency Injection - Spring will automatically inject the dependencies
     private final DashboardService dashboardService;
     private final AuthService authService;
 
-    @GetMapping
-    @Operation(
+    @GetMapping // Maps HTTP GET requests to the /api/dashboard endpoint
+    @Operation( 
         summary = "Get dashboard data",
         description = "Returns aggregated dashboard data including plan, accumulators, and recent claims"
     )
     public ResponseEntity<DashboardResponse> getDashboardData(Authentication authentication) {
         log.debug("Getting dashboard data for user: {}", authentication.getName());
         
+        // Controller Logic Flow:
+        // 1. Extract user context from spring security context
+        // 2. Delegate business logic to DashboardService
+        // 3. Handle response formatting
+        // 4. Return HTTP response
         return authService.getCurrentMember(authentication)
             .map(member -> {
                 DashboardResponse response = dashboardService.getDashboardData(member.getId());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(response); // Http 200
             })
-            .orElse(ResponseEntity.notFound().build());
+            .orElse(ResponseEntity.notFound().build()); // Http 404
     }
 }
